@@ -1,0 +1,202 @@
+<!DOCTYPE html><html lang="zh-TW" data-astro-cid-mw7aashj> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MCP 整合：連接 Claude Code 與各大編輯器 | </title><link rel="stylesheet" href="/gitnexus/_astro/DocsLayout.BldRaKia.css">
+<style>.cb-wrap[data-astro-cid-jgrc2lfe]{margin-bottom:1.25rem}.cb-bar[data-astro-cid-jgrc2lfe]{display:flex;align-items:center;justify-content:space-between;background:#1a1a2e;border-radius:6px 6px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.05);padding:.18rem .5rem .18rem .75rem;min-height:1.8rem}.cb-label[data-astro-cid-jgrc2lfe]{color:#a6adc8;font-family:Fira Code,Cascadia Code,Consolas,monospace;font-size:.73rem;letter-spacing:.04em}.cb-inner[data-astro-cid-jgrc2lfe] pre{border-radius:0 0 8px 8px!important;margin-bottom:0!important}.cb-copy[data-astro-cid-jgrc2lfe]{background:#ffffff14;color:#888;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:.15rem .55rem;font-size:.7rem;cursor:pointer;transition:all .15s;flex-shrink:0}.cb-copy[data-astro-cid-jgrc2lfe]:hover{background:#ffffff2e;color:#fff}.cb-copy[data-astro-cid-jgrc2lfe].copied{color:#4ec9b0;border-color:#4ec9b0}
+</style></head>GitNexus 完整指南 <meta name="description" content="用 gitnexus setup 一鍵配置或手動編輯 JSON，把 GitNexus MCP Server 接入 Claude Code、Cursor、Codex、Windsurf、OpenCode 與 Antigravity。比較各編輯器的支援深度，並說明 Claude Code 享有的最深度整合。"> <link rel="icon" href="/gitnexus/favicon.svg" type="image/svg+xml"> <script>
+    (function () {
+      const s = localStorage.getItem('cc-theme');
+      const d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+    })();
+  </script>  </html> <body data-astro-cid-mw7aashj> <div id="pb" data-astro-cid-mw7aashj></div> <header data-astro-cid-mw7aashj> <div class="hi" data-astro-cid-mw7aashj> <div class="hl" data-astro-cid-mw7aashj> <button id="mbtn" class="ibtn" aria-label="選單" data-astro-cid-mw7aashj> <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" data-astro-cid-mw7aashj></path> </svg> </button> <a href="/gitnexus/" class="site-name" data-astro-cid-mw7aashj> <span class="logo" data-astro-cid-mw7aashj>GN</span>&nbsp;&nbsp;GitNexus 完整指南
+</a> </div> <div class="hr" data-astro-cid-mw7aashj> <button id="tt" class="ibtn" aria-label="切換主題" data-astro-cid-mw7aashj> <svg id="isun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" data-astro-cid-mw7aashj></path> </svg> <svg id="imoon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" data-astro-cid-mw7aashj></path> </svg> </button> </div> </div> </header> <div id="layout" data-astro-cid-mw7aashj> <nav id="sb" data-astro-cid-mw7aashj> <div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="1" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 1：認識 GitNexus</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="1" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch01-what-is-gitnexus" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>1.</span> <span data-astro-cid-mw7aashj>GitNexus 是什麼？零伺服器程式碼智慧引擎</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch02-why-knowledge-graph" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>2.</span> <span data-astro-cid-mw7aashj>AI Coding 的結構盲點：為什麼需要知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch03-graph-vs-rag" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>3.</span> <span data-astro-cid-mw7aashj>知識圖譜 vs Vector RAG vs Graph RAG</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="2" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 2：安裝與快速上手</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="2" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch04-install" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>4.</span> <span data-astro-cid-mw7aashj>安裝與環境設定</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch05-first-index" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>5.</span> <span data-astro-cid-mw7aashj>索引你的第一個程式碼庫</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch06-web-ui" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>6.</span> <span data-astro-cid-mw7aashj>Web UI 視覺化探索</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="3" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 3：核心架構原理</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="3" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch07-indexing-pipeline" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>7.</span> <span data-astro-cid-mw7aashj>索引管線：從 Tree-sitter AST 到知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch08-ladybugdb-search" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>8.</span> <span data-astro-cid-mw7aashj>LadybugDB 與混合搜尋（BM25 + Semantic + RRF）</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch09-clustering-processes" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>9.</span> <span data-astro-cid-mw7aashj>Leiden 社群偵測與執行流程追蹤</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="4" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 4：MCP 整合與 Agent 實戰</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="4" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch10-mcp-setup" class="active" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>10.</span> <span data-astro-cid-mw7aashj>MCP 整合：連接 Claude Code 與各大編輯器</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch11-mcp-tools" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>11.</span> <span data-astro-cid-mw7aashj>16 個 MCP 工具詳解</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch12-skills-hooks" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>12.</span> <span data-astro-cid-mw7aashj>Agent Skills 與 Hooks 自動化工作流</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch13-real-world" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>13.</span> <span data-astro-cid-mw7aashj>實戰場景：PR Review、Bug 定位、安全重構</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="5" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 5：進階應用與生態</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="5" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch14-multi-repo-docker" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>14.</span> <span data-astro-cid-mw7aashj>多倉庫架構與 Docker 部署</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch15-cypher-wiki" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>15.</span> <span data-astro-cid-mw7aashj>Cypher 圖查詢與 Wiki 自動生成</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch16-tool-comparison" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>16.</span> <span data-astro-cid-mw7aashj>競品橫向比較與工具選型</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="6" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 6：附錄</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="6" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/about" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>17.</span> <span data-astro-cid-mw7aashj>關於作者</span>  </a> </li> </ul> </div> </nav> <div id="ov" data-astro-cid-mw7aashj></div> <main data-astro-cid-mw7aashj> <div class="cb" data-astro-cid-mw7aashj>  <span class="clabel">第 10 章 · Part 4：MCP 整合與 Agent 實戰</span> <h1>MCP 整合：連接 Claude Code 與各大編輯器</h1> <p class="cdesc">一行指令，讓你的 AI 編輯器擁有專案級上帝視角</p> <h2>快速路徑：gitnexus setup 自動配置</h2> <p>在完成索引後，執行一次 <code>gitnexus setup</code>，它會自動偵測你安裝了哪些 AI 編輯器，並寫入正確的 MCP 配置：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>gitnexus setup 自動配置</span> <button class="cb-copy" data-code="# 最快的方式：gitnexus setup 自動配置（一次性）
+gitnexus setup
+
+# 輸出示例：
+# ✓ Detected: Claude Code
+# ✓ Detected: Cursor
+# ✓ Writing ~/.claude/claude_mcp_config.json ... done
+# ✓ Writing ~/.cursor/mcp.json ... done
+# ✓ Skills installed to .claude/skills/gitnexus/
+# ✓ Hooks registered (PreToolUse + PostToolUse)
+# Setup complete." data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 最快的方式：gitnexus setup 自動配置（一次性）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> setup</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 輸出示例：</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ✓ Detected: Claude Code</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ✓ Detected: Cursor</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ✓ Writing ~/.claude/claude_mcp_config.json ... done</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ✓ Writing ~/.cursor/mcp.json ... done</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ✓ Skills installed to .claude/skills/gitnexus/</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ✓ Hooks registered (PreToolUse + PostToolUse)</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Setup complete.</span></span></code></pre> </div> </div>  <script type="module">document.querySelectorAll(".cb-copy").forEach(e=>{e.addEventListener("click",()=>{const t=e.dataset.code;t&&navigator.clipboard.writeText(t).then(()=>{e.textContent="已複製!",e.classList.add("copied"),setTimeout(()=>{e.textContent="複製",e.classList.remove("copied")},2e3)})})});</script> <p><code>gitnexus setup</code> 的工作內容：</p> <ul> <li>偵測已安裝的編輯器（Claude Code、Cursor、Codex、Windsurf、OpenCode、Antigravity）</li> <li>為每個編輯器寫入對應的 MCP 配置檔案（使用絕對路徑，不用 <code>npx</code>）</li> <li>為 Claude Code 和 Cursor 安裝 PreToolUse / PostToolUse Hooks</li> <li>為 Antigravity 寫入 <code>AfterTool</code> Hook 並安裝 skills</li> <li>把 repo 專屬 Skills 安裝到 <code>.claude/skills/gitnexus/</code></li> </ul> <div class="call tip"> <span class="ci">💡</span> <div> <strong>全局安裝 + gitnexus setup（強烈推薦）</strong> <p><code>gitnexus setup</code> 寫入的 MCP 配置使用絕對路徑（<code>"command": "gitnexus"</code>），不走 <code>npx</code>。這樣 MCP Server 啟動時不需要 npm 下載，避免超過 Claude Code 的 <code>MCP_TIMEOUT</code> 預設值（約 30 秒）。相比之下，直接在 JSON 裡寫 <code>npx -y gitnexus@latest mcp</code> 在網路慢或快取失效時可能超時失敗。</p> </div> </div> <h2>各編輯器手動配置</h2> <p>如果偏好手動控制或 <code>gitnexus setup</code> 沒有正確偵測到你的編輯器，以下是每個編輯器的手動配置方式：</p> <h3>Claude Code</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>Claude Code：快速指令（推薦）</span> <button class="cb-copy" data-code="# Claude Code 快速指令（macOS / Linux）
+claude mcp add gitnexus -- npx -y gitnexus@latest mcp
+
+# Windows
+claude mcp add gitnexus -- cmd /c npx -y gitnexus@latest mcp
+
+# 驗證 MCP 已加入
+claude mcp list" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># Claude Code 快速指令（macOS / Linux）</span></span>
+<span class="line"><span style="color:#61AFEF">claude</span><span style="color:#98C379"> mcp</span><span style="color:#98C379"> add</span><span style="color:#98C379"> gitnexus</span><span style="color:#D19A66"> --</span><span style="color:#98C379"> npx</span><span style="color:#D19A66"> -y</span><span style="color:#98C379"> gitnexus@latest</span><span style="color:#98C379"> mcp</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Windows</span></span>
+<span class="line"><span style="color:#61AFEF">claude</span><span style="color:#98C379"> mcp</span><span style="color:#98C379"> add</span><span style="color:#98C379"> gitnexus</span><span style="color:#D19A66"> --</span><span style="color:#98C379"> cmd</span><span style="color:#98C379"> /c</span><span style="color:#98C379"> npx</span><span style="color:#D19A66"> -y</span><span style="color:#98C379"> gitnexus@latest</span><span style="color:#98C379"> mcp</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 驗證 MCP 已加入</span></span>
+<span class="line"><span style="color:#61AFEF">claude</span><span style="color:#98C379"> mcp</span><span style="color:#98C379"> list</span></span></code></pre> </div> </div>   <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>Claude Code：JSON 配置（~/.claude/claude_mcp_config.json）</span> <button class="cb-copy" data-code="// ~/.claude/claude_mcp_config.json（全局 MCP 配置）
+// gitnexus setup 寫入的推薦格式（使用絕對路徑，避免 npx 冷啟動超時）
+{
+  &quot;mcpServers&quot;: {
+    &quot;gitnexus&quot;: {
+      &quot;command&quot;: &quot;gitnexus&quot;,
+      &quot;args&quot;: [&quot;mcp&quot;]
+    }
+  }
+}" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="json"><code><span class="line"><span style="color:#7F848E;font-style:italic">// ~/.claude/claude_mcp_config.json（全局 MCP 配置）</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// gitnexus setup 寫入的推薦格式（使用絕對路徑，避免 npx 冷啟動超時）</span></span>
+<span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcpServers"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "gitnexus"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"gitnexus"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "args"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"mcp"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre> </div> </div>   <h3>Cursor</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>Cursor：~/.cursor/mcp.json</span> <button class="cb-copy" data-code="// ~/.cursor/mcp.json（Cursor 全局 MCP 配置）
+{
+  &quot;mcpServers&quot;: {
+    &quot;gitnexus&quot;: {
+      &quot;command&quot;: &quot;npx&quot;,
+      &quot;args&quot;: [&quot;-y&quot;, &quot;gitnexus@latest&quot;, &quot;mcp&quot;]
+    }
+  }
+}" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="json"><code><span class="line"><span style="color:#7F848E;font-style:italic">// ~/.cursor/mcp.json（Cursor 全局 MCP 配置）</span></span>
+<span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcpServers"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "gitnexus"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"npx"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "args"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"-y"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"gitnexus@latest"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"mcp"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre> </div> </div>   <p>寫入後重啟 Cursor，在設定中確認 MCP 狀態為綠燈。Cursor 也需要手動安裝 PostToolUse Hook——見 GitHub 上 <code>gitnexus-cursor-integration/README.md</code> 的說明。</p> <h3>Antigravity（Google Gemini CLI）</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>Antigravity：~/.gemini/antigravity/mcp_config.json</span> <button class="cb-copy" data-code="// ~/.gemini/antigravity/mcp_config.json（Antigravity MCP 配置）
+{
+  &quot;mcpServers&quot;: {
+    &quot;gitnexus&quot;: {
+      &quot;command&quot;: &quot;npx&quot;,
+      &quot;args&quot;: [&quot;-y&quot;, &quot;gitnexus@latest&quot;, &quot;mcp&quot;]
+    }
+  }
+}
+
+// gitnexus setup 也會同時在 ~/.gemini/settings.json
+// 寫入 AfterTool Hook 並安裝 skills 到 ~/.gemini/antigravity/skills/" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="json"><code><span class="line"><span style="color:#7F848E;font-style:italic">// ~/.gemini/antigravity/mcp_config.json（Antigravity MCP 配置）</span></span>
+<span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcpServers"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "gitnexus"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"npx"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "args"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"-y"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"gitnexus@latest"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"mcp"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// gitnexus setup 也會同時在 ~/.gemini/settings.json</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 寫入 AfterTool Hook 並安裝 skills 到 ~/.gemini/antigravity/skills/</span></span></code></pre> </div> </div>   <h3>OpenCode</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>OpenCode：~/.config/opencode/config.json</span> <button class="cb-copy" data-code="// ~/.config/opencode/config.json（OpenCode 配置）
+{
+  &quot;mcp&quot;: {
+    &quot;gitnexus&quot;: {
+      &quot;type&quot;: &quot;local&quot;,
+      &quot;command&quot;: [&quot;gitnexus&quot;, &quot;mcp&quot;]
+    }
+  }
+}" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="json"><code><span class="line"><span style="color:#7F848E;font-style:italic">// ~/.config/opencode/config.json（OpenCode 配置）</span></span>
+<span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcp"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "gitnexus"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "type"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"local"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"gitnexus"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"mcp"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre> </div> </div>   <h3>Codex</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>Codex：~/.codex/config.toml</span> <button class="cb-copy" data-code="# ~/.codex/config.toml（Codex 系統級配置）
+[mcp_servers.gitnexus]
+command = &quot;npx&quot;
+args = [&quot;-y&quot;, &quot;gitnexus@latest&quot;, &quot;mcp&quot;]
+
+# 或 project 級 .codex/config.toml（只對當前 repo 生效）" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="toml"><code><span class="line"><span style="color:#7F848E;font-style:italic"># ~/.codex/config.toml（Codex 系統級配置）</span></span>
+<span class="line"><span style="color:#ABB2BF">[</span><span style="color:#61AFEF">mcp_servers</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">gitnexus</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#E06C75">command</span><span style="color:#ABB2BF"> = </span><span style="color:#98C379">"npx"</span></span>
+<span class="line"><span style="color:#E06C75">args</span><span style="color:#ABB2BF"> = [</span><span style="color:#98C379">"-y"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"gitnexus@latest"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"mcp"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 或 project 級 .codex/config.toml（只對當前 repo 生效）</span></span></code></pre> </div> </div>   <h2>各編輯器支援深度對比</h2> <table> <thead> <tr> <th>編輯器</th> <th>MCP 工具</th> <th>Agent Skills</th> <th>Hooks 自動增強</th> <th>支援等級</th> </tr> </thead> <tbody> <tr> <td><strong>Claude Code</strong></td> <td>✅ 16 個</td> <td>✅ 4 個 Skills</td> <td>✅ PreToolUse + PostToolUse</td> <td><strong>完整</strong></td> </tr> <tr> <td><strong>Cursor</strong></td> <td>✅ 16 個</td> <td>✅ 4 個 Skills</td> <td>✅ postToolUse（需手動安裝）</td> <td><strong>完整</strong></td> </tr> <tr> <td><strong>Antigravity</strong></td> <td>✅ 16 個</td> <td>✅</td> <td>✅ AfterTool</td> <td><strong>完整</strong></td> </tr> <tr> <td><strong>Codex</strong></td> <td>✅ 16 個</td> <td>✅</td> <td>—</td> <td>MCP + Skills</td> </tr> <tr> <td><strong>Windsurf</strong></td> <td>✅ 16 個</td> <td>—</td> <td>—</td> <td>MCP only</td> </tr> <tr> <td><strong>OpenCode</strong></td> <td>✅ 16 個</td> <td>✅</td> <td>—</td> <td>MCP + Skills</td> </tr> </tbody> </table> <div class="call info"> <span class="ci">ℹ️</span> <div> <strong>Claude Code 的三重深度整合</strong> <p>Claude Code 享有最深度整合，因為它支援三層機制同時作用：</p> <ul> <li><strong>MCP 工具</strong>：16 個工具，隨時可直接呼叫</li> <li><strong>PreToolUse Hook</strong>：在 Claude Code 執行 Grep/Read/Write 等工具前，自動注入知識圖譜上下文，讓 Claude 在搜尋時就帶著圖譜視角</li> <li><strong>PostToolUse Hook</strong>：在 <code>git commit/merge/rebase</code> 成功後，自動偵測索引是否過時（stale），提示 Claude 重新執行 <code>gitnexus analyze</code></li> </ul> </div> </div> <h2>連線驗證</h2> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>驗證 MCP 連線</span> <button class="cb-copy" data-code="# 驗證 MCP 連線是否正常
+gitnexus list    # 應列出已索引的 repo
+
+# 在 Claude Code 對話中驗證
+# 直接問 Claude：&quot;use the gitnexus query tool to search for authentication logic&quot;
+# Claude 應能呼叫 gitnexus query 並返回結果
+
+# 如果 MCP 連線有問題，查看 Claude Code MCP 狀態
+claude mcp list   # 確認 gitnexus 狀態為 running" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 驗證 MCP 連線是否正常</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> list</span><span style="color:#7F848E;font-style:italic">    # 應列出已索引的 repo</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 在 Claude Code 對話中驗證</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 直接問 Claude："use the gitnexus query tool to search for authentication logic"</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Claude 應能呼叫 gitnexus query 並返回結果</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 如果 MCP 連線有問題，查看 Claude Code MCP 狀態</span></span>
+<span class="line"><span style="color:#61AFEF">claude</span><span style="color:#98C379"> mcp</span><span style="color:#98C379"> list</span><span style="color:#7F848E;font-style:italic">   # 確認 gitnexus 狀態為 running</span></span></code></pre> </div> </div>   <h2>常見 MCP 連線問題</h2> <table> <thead> <tr> <th>問題</th> <th>原因</th> <th>解決方式</th> </tr> </thead> <tbody> <tr> <td>MCP Server 啟動超時</td> <td><code>npx</code> 冷啟動時間超過 <code>MCP_TIMEOUT</code>（~30s）</td> <td>改用全局安裝 + 絕對路徑：<code>"command": "gitnexus"</code></td> </tr> <tr> <td>gitnexus 工具呼叫返回「no repos indexed」</td> <td>當前目錄的 repo 還沒執行 <code>gitnexus analyze</code></td> <td>切到 repo 根目錄執行 <code>gitnexus analyze</code></td> </tr> <tr> <td>Claude Code 看不到 gitnexus 在 MCP 列表</td> <td>配置檔案寫錯路徑或 JSON 格式錯誤</td> <td>執行 <code>claude mcp list</code> 檢查；確認 JSON 無語法錯誤</td> </tr> <tr> <td>Cursor 連線後無回應</td> <td>Cursor 版本不支援或需要重啟</td> <td>完全關閉並重新開啟 Cursor</td> </tr> <tr> <td>Windows 找不到 <code>gitnexus</code> 命令</td> <td>npm 全局 bin 目錄不在 PATH 中</td> <td>執行 <code>npm config get prefix</code> 取得路徑，加入 Windows 環境變數（見第 4 章）</td> </tr> </tbody> </table> <h2>用 .gitnexusrc 固化專案配置</h2> <p>如果你有些 <code>gitnexus analyze</code> 選項每次都需要傳，可以在 repo 根目錄建立 <code>.gitnexusrc</code> 文件：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>.gitnexusrc 配置範例</span> <button class="cb-copy" data-code="// 在 repo 根目錄建立 .gitnexusrc 固化常用設定
+// CLI flags 永遠優先於此檔案
+{
+  &quot;defaultBranch&quot;: &quot;develop&quot;,    // 預設分支（generate wiki/regression compare 用）
+  &quot;embeddings&quot;: true,            // 每次 analyze 都開啟語義向量
+  &quot;skipContextFiles&quot;: false,     // 不跳過 AGENTS.md/CLAUDE.md 生成
+  &quot;skipSkills&quot;: false,           // 不跳過 .claude/skills/gitnexus/ 安裝
+  &quot;workerTimeout&quot;: 60            // 大型 repo 的 worker timeout（秒）
+}" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="json"><code><span class="line"><span style="color:#7F848E;font-style:italic">// 在 repo 根目錄建立 .gitnexusrc 固化常用設定</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// CLI flags 永遠優先於此檔案</span></span>
+<span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "defaultBranch"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"develop"</span><span style="color:#ABB2BF">,    </span><span style="color:#7F848E;font-style:italic">// 預設分支（generate wiki/regression compare 用）</span></span>
+<span class="line"><span style="color:#E06C75">  "embeddings"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span><span style="color:#ABB2BF">,            </span><span style="color:#7F848E;font-style:italic">// 每次 analyze 都開啟語義向量</span></span>
+<span class="line"><span style="color:#E06C75">  "skipContextFiles"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">false</span><span style="color:#ABB2BF">,     </span><span style="color:#7F848E;font-style:italic">// 不跳過 AGENTS.md/CLAUDE.md 生成</span></span>
+<span class="line"><span style="color:#E06C75">  "skipSkills"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">false</span><span style="color:#ABB2BF">,           </span><span style="color:#7F848E;font-style:italic">// 不跳過 .claude/skills/gitnexus/ 安裝</span></span>
+<span class="line"><span style="color:#E06C75">  "workerTimeout"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">60</span><span style="color:#7F848E;font-style:italic">            // 大型 repo 的 worker timeout（秒）</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre> </div> </div>   <p>注意：CLI 旗標永遠優先於 <code>.gitnexusrc</code>。這個檔案只是為了省去每次輸入相同旗標的麻煩，不是強制配置。</p> <h2>移除 MCP 配置</h2> <p>如果需要反向操作，<code>gitnexus uninstall</code> 可以安全移除所有 MCP 配置、Hooks 和 Skills：</p> <pre><code>gitnexus uninstall          # 預覽（dry run），列出會移除的路徑
+gitnexus uninstall --force  # 實際執行移除</code></pre> <p>預設是 dry run（只預覽不執行），加 <code>--force</code> 才真正刪除。per-repo 索引（<code>.gitnexus/</code>）和 npm 套件本身（<code>npm uninstall -g gitnexus</code>）需要另外手動移除。</p>  </div> <nav class="cnav" data-astro-cid-mw7aashj> <a href="/gitnexus/ch09-clustering-processes" class="prev" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>← 上一章</span> <span class="nt" data-astro-cid-mw7aashj>Leiden 社群偵測與執行流程追蹤</span> </a> <a href="/gitnexus/ch11-mcp-tools" class="next" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>下一章 →</span> <span class="nt" data-astro-cid-mw7aashj>16 個 MCP 工具詳解</span> </a> </nav> </main> </div> <script>
+    // Theme
+    const html = document.documentElement;
+    const tt = document.getElementById('tt');
+    const isun = document.getElementById('isun');
+    const imoon = document.getElementById('imoon');
+    function syncIcons() {
+      const dk = html.classList.contains('dark');
+      isun.style.display = dk ? 'block' : 'none';
+      imoon.style.display = dk ? 'none' : 'block';
+    }
+    syncIcons();
+    tt?.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('cc-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      syncIcons();
+    });
+
+    // Progress
+    const pb = document.getElementById('pb');
+    window.addEventListener('scroll', () => {
+      const t = document.documentElement.scrollHeight - window.innerHeight;
+      pb.style.width = t > 0 ? `${(window.scrollY / t) * 100}%` : '0%';
+    }, { passive: true });
+
+    // Sidebar part toggles
+    document.querySelectorAll('.pt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.pid;
+        const list = document.querySelector(`[data-pl="${id}"]`);
+        btn.classList.toggle('open');
+        list?.classList.toggle('closed');
+      });
+    });
+
+    // Mobile menu
+    const sb = document.getElementById('sb');
+    const ov = document.getElementById('ov');
+    const mb = document.getElementById('mbtn');
+    const open = () => { sb.classList.add('open'); ov.classList.add('open'); document.body.style.overflow='hidden'; };
+    const close = () => { sb.classList.remove('open'); ov.classList.remove('open'); document.body.style.overflow=''; };
+    mb?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+  </script> </body> 

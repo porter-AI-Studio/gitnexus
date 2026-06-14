@@ -1,0 +1,165 @@
+<!DOCTYPE html><html lang="zh-TW" data-astro-cid-mw7aashj> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>索引你的第一個程式碼庫 | </title><link rel="stylesheet" href="/gitnexus/_astro/DocsLayout.BldRaKia.css">
+<style>.cb-wrap[data-astro-cid-jgrc2lfe]{margin-bottom:1.25rem}.cb-bar[data-astro-cid-jgrc2lfe]{display:flex;align-items:center;justify-content:space-between;background:#1a1a2e;border-radius:6px 6px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.05);padding:.18rem .5rem .18rem .75rem;min-height:1.8rem}.cb-label[data-astro-cid-jgrc2lfe]{color:#a6adc8;font-family:Fira Code,Cascadia Code,Consolas,monospace;font-size:.73rem;letter-spacing:.04em}.cb-inner[data-astro-cid-jgrc2lfe] pre{border-radius:0 0 8px 8px!important;margin-bottom:0!important}.cb-copy[data-astro-cid-jgrc2lfe]{background:#ffffff14;color:#888;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:.15rem .55rem;font-size:.7rem;cursor:pointer;transition:all .15s;flex-shrink:0}.cb-copy[data-astro-cid-jgrc2lfe]:hover{background:#ffffff2e;color:#fff}.cb-copy[data-astro-cid-jgrc2lfe].copied{color:#4ec9b0;border-color:#4ec9b0}
+</style></head>GitNexus 完整指南 <meta name="description" content="實際操作 gitnexus analyze 索引第一個專案：基礎索引、--embeddings 語義向量、--skills 技能生成與 --force 全量重建等參數詳解。理解 .gitnexus 資料夾結構、索引統計數據，以及基礎、推薦與完整三種索引配置策略。"> <link rel="icon" href="/gitnexus/favicon.svg" type="image/svg+xml"> <script>
+    (function () {
+      const s = localStorage.getItem('cc-theme');
+      const d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+    })();
+  </script>  </html> <body data-astro-cid-mw7aashj> <div id="pb" data-astro-cid-mw7aashj></div> <header data-astro-cid-mw7aashj> <div class="hi" data-astro-cid-mw7aashj> <div class="hl" data-astro-cid-mw7aashj> <button id="mbtn" class="ibtn" aria-label="選單" data-astro-cid-mw7aashj> <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" data-astro-cid-mw7aashj></path> </svg> </button> <a href="/gitnexus/" class="site-name" data-astro-cid-mw7aashj> <span class="logo" data-astro-cid-mw7aashj>GN</span>&nbsp;&nbsp;GitNexus 完整指南
+</a> </div> <div class="hr" data-astro-cid-mw7aashj> <button id="tt" class="ibtn" aria-label="切換主題" data-astro-cid-mw7aashj> <svg id="isun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" data-astro-cid-mw7aashj></path> </svg> <svg id="imoon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" data-astro-cid-mw7aashj></path> </svg> </button> </div> </div> </header> <div id="layout" data-astro-cid-mw7aashj> <nav id="sb" data-astro-cid-mw7aashj> <div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="1" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 1：認識 GitNexus</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="1" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch01-what-is-gitnexus" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>1.</span> <span data-astro-cid-mw7aashj>GitNexus 是什麼？零伺服器程式碼智慧引擎</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch02-why-knowledge-graph" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>2.</span> <span data-astro-cid-mw7aashj>AI Coding 的結構盲點：為什麼需要知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch03-graph-vs-rag" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>3.</span> <span data-astro-cid-mw7aashj>知識圖譜 vs Vector RAG vs Graph RAG</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="2" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 2：安裝與快速上手</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="2" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch04-install" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>4.</span> <span data-astro-cid-mw7aashj>安裝與環境設定</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch05-first-index" class="active" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>5.</span> <span data-astro-cid-mw7aashj>索引你的第一個程式碼庫</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch06-web-ui" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>6.</span> <span data-astro-cid-mw7aashj>Web UI 視覺化探索</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="3" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 3：核心架構原理</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="3" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch07-indexing-pipeline" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>7.</span> <span data-astro-cid-mw7aashj>索引管線：從 Tree-sitter AST 到知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch08-ladybugdb-search" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>8.</span> <span data-astro-cid-mw7aashj>LadybugDB 與混合搜尋（BM25 + Semantic + RRF）</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch09-clustering-processes" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>9.</span> <span data-astro-cid-mw7aashj>Leiden 社群偵測與執行流程追蹤</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="4" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 4：MCP 整合與 Agent 實戰</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="4" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch10-mcp-setup" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>10.</span> <span data-astro-cid-mw7aashj>MCP 整合：連接 Claude Code 與各大編輯器</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch11-mcp-tools" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>11.</span> <span data-astro-cid-mw7aashj>16 個 MCP 工具詳解</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch12-skills-hooks" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>12.</span> <span data-astro-cid-mw7aashj>Agent Skills 與 Hooks 自動化工作流</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch13-real-world" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>13.</span> <span data-astro-cid-mw7aashj>實戰場景：PR Review、Bug 定位、安全重構</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="5" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 5：進階應用與生態</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="5" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch14-multi-repo-docker" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>14.</span> <span data-astro-cid-mw7aashj>多倉庫架構與 Docker 部署</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch15-cypher-wiki" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>15.</span> <span data-astro-cid-mw7aashj>Cypher 圖查詢與 Wiki 自動生成</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch16-tool-comparison" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>16.</span> <span data-astro-cid-mw7aashj>競品橫向比較與工具選型</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="6" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 6：附錄</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="6" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/about" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>17.</span> <span data-astro-cid-mw7aashj>關於作者</span>  </a> </li> </ul> </div> </nav> <div id="ov" data-astro-cid-mw7aashj></div> <main data-astro-cid-mw7aashj> <div class="cb" data-astro-cid-mw7aashj>  <span class="clabel">第 5 章 · Part 2：安裝與快速上手</span> <h1>索引你的第一個程式碼庫</h1> <p class="cdesc">gitnexus analyze：零 Token 消耗，本地完成所有計算</p> <h2>第一步：執行索引</h2> <p>確認已在 repo 根目錄後，執行：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>執行基礎索引</span> <button class="cb-copy" data-code="# 在 repo 根目錄執行（必須是真正包含程式碼的目錄）
+npx gitnexus analyze
+
+# 或全局安裝後直接執行
+gitnexus analyze" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 在 repo 根目錄執行（必須是真正包含程式碼的目錄）</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> gitnexus</span><span style="color:#98C379"> analyze</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 或全局安裝後直接執行</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span></span></code></pre> </div> </div>  <script type="module">document.querySelectorAll(".cb-copy").forEach(e=>{e.addEventListener("click",()=>{const t=e.dataset.code;t&&navigator.clipboard.writeText(t).then(()=>{e.textContent="已複製!",e.classList.add("copied"),setTimeout(()=>{e.textContent="複製",e.classList.remove("copied")},2e3)})})});</script> <p>GitNexus 會掃描所有程式碼檔案、用 Tree-sitter 解析 AST、解析跨檔案依賴、偵測功能集群、追蹤執行流程，最後建立搜尋索引。全程在本地執行，不消耗任何 LLM Token。</p> <h3>索引完成後的輸出</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>索引完成輸出示例</span> <button class="cb-copy" data-code="✓ Scanning project structure...
+✓ Parsing 1,247 files with Tree-sitter...
+✓ Resolving cross-file dependencies...
+✓ Detecting communities (Leiden algorithm)...
+✓ Tracing execution processes...
+✓ Building search index...
+
+Index complete in 23s
+
+  Symbols:    81,400
+  Relations:  191,438
+  Clusters:   47 functional groups
+  Processes:  300 execution flows
+
+Agent skills installed → .claude/skills/
+CLAUDE.md updated with repo context" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span>✓ Scanning project structure...</span></span>
+<span class="line"><span>✓ Parsing 1,247 files with Tree-sitter...</span></span>
+<span class="line"><span>✓ Resolving cross-file dependencies...</span></span>
+<span class="line"><span>✓ Detecting communities (Leiden algorithm)...</span></span>
+<span class="line"><span>✓ Tracing execution processes...</span></span>
+<span class="line"><span>✓ Building search index...</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Index complete in 23s</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  Symbols:    81,400</span></span>
+<span class="line"><span>  Relations:  191,438</span></span>
+<span class="line"><span>  Clusters:   47 functional groups</span></span>
+<span class="line"><span>  Processes:  300 execution flows</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Agent skills installed → .claude/skills/</span></span>
+<span class="line"><span>CLAUDE.md updated with repo context</span></span></code></pre> </div> </div>   <p>幾個關鍵數字：</p> <ul> <li><strong>Symbols</strong>：被解析出的函式、類別、方法、變數等符號總數</li> <li><strong>Relations</strong>：符號間的關係數（呼叫、匯入、繼承、參考）</li> <li><strong>Clusters</strong>：Leiden 演算法自動分組出的功能集群數量</li> <li><strong>Processes</strong>：從入口點追蹤出的完整執行流程數量</li> </ul> <h2>重要參數詳解</h2> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>gitnexus analyze 參數一覽</span> <button class="cb-copy" data-code="# 參數說明
+
+gitnexus analyze                    # 基礎索引（無語義搜尋）
+gitnexus analyze --embeddings       # 開啟語義向量（啟用 semantic search）
+gitnexus analyze --skills           # 生成專案專屬 Agent Skills
+gitnexus analyze --force            # 強制全量重建（忽略 stale 檢測）
+gitnexus analyze --skip-embeddings  # 明確跳過向量，加速索引
+gitnexus analyze --skip-git         # 非 Git repo 時跳過 git 相關操作
+gitnexus analyze --verbose          # 詳細輸出，可看到每個階段耗時
+gitnexus analyze src/components     # 只索引指定子目錄" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 參數說明</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span><span style="color:#7F848E;font-style:italic">                    # 基礎索引（無語義搜尋）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span><span style="color:#D19A66"> --embeddings</span><span style="color:#7F848E;font-style:italic">       # 開啟語義向量（啟用 semantic search）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span><span style="color:#D19A66"> --skills</span><span style="color:#7F848E;font-style:italic">           # 生成專案專屬 Agent Skills</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span><span style="color:#D19A66"> --force</span><span style="color:#7F848E;font-style:italic">            # 強制全量重建（忽略 stale 檢測）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span><span style="color:#D19A66"> --skip-embeddings</span><span style="color:#7F848E;font-style:italic">  # 明確跳過向量，加速索引</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span><span style="color:#D19A66"> --skip-git</span><span style="color:#7F848E;font-style:italic">         # 非 Git repo 時跳過 git 相關操作</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span><span style="color:#D19A66"> --verbose</span><span style="color:#7F848E;font-style:italic">          # 詳細輸出，可看到每個階段耗時</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span><span style="color:#98C379"> src/components</span><span style="color:#7F848E;font-style:italic">     # 只索引指定子目錄</span></span></code></pre> </div> </div>   <table> <thead> <tr> <th>參數</th> <th>作用</th> <th>額外耗時</th> <th>建議</th> </tr> </thead> <tbody> <tr> <td><code>（無）</code></td> <td>結構索引（呼叫圖、依賴、集群、執行流）</td> <td>—</td> <td>首次嘗試用這個</td> </tr> <tr> <td><code>--embeddings</code></td> <td>額外建立語義向量索引，啟用自然語言搜尋</td> <td>中等（HuggingFace 本地推論）</td> <td>日常開發推薦加上</td> </tr> <tr> <td><code>--skills</code></td> <td>生成專案專屬的 4 個 Agent Skills</td> <td>少量</td> <td>完整整合時加上</td> </tr> <tr> <td><code>--force</code></td> <td>強制全量重建，忽略 stale 檢測</td> <td>同首次索引</td> <td>索引疑似損壞時用</td> </tr> <tr> <td><code>--skip-embeddings</code></td> <td>明確跳過向量，只做結構索引</td> <td>節省向量計算時間</td> <td>只需結構查詢時用</td> </tr> <tr> <td><code>--skip-git</code></td> <td>跳過 git 相關操作</td> <td>—</td> <td>非 Git repo 時用</td> </tr> <tr> <td><code>--verbose</code></td> <td>顯示每個階段的詳細耗時</td> <td>—</td> <td>排查索引問題時用</td> </tr> </tbody> </table> <div class="call tip"> <span class="ci">💡</span> <div> <strong>--embeddings 的真正意義</strong> <p>不加 <code>--embeddings</code> 時，<code>query</code> 工具只有 BM25 關鍵字搜尋，無法用「找到處理用戶認證的程式碼」這種語義描述搜尋。加上之後，GitNexus 在本地執行 HuggingFace transformers.js 模型，把每個符號的語義也編碼進去——不需要 OpenAI API key，不需要網路，完全本地推論。</p> </div> </div> <h2>三種索引策略</h2> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>三種索引配置</span> <button class="cb-copy" data-code="# 基礎索引（快速，無語義搜尋）
+gitnexus analyze
+# 適合：首次嘗試、小型專案、只需結構查詢
+
+# 推薦索引（結構 + 語義）
+gitnexus analyze --embeddings
+# 適合：日常開發、需要自然語言搜尋
+
+# 完整索引（結構 + 語義 + Skills）
+gitnexus analyze --embeddings --skills
+# 適合：大型專案、完整 AI Agent 整合" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 基礎索引（快速，無語義搜尋）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 適合：首次嘗試、小型專案、只需結構查詢</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 推薦索引（結構 + 語義）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span><span style="color:#D19A66"> --embeddings</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 適合：日常開發、需要自然語言搜尋</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 完整索引（結構 + 語義 + Skills）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span><span style="color:#D19A66"> --embeddings</span><span style="color:#D19A66"> --skills</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 適合：大型專案、完整 AI Agent 整合</span></span></code></pre> </div> </div>   <h2>.gitnexus 資料夾結構</h2> <p>索引完成後，repo 根目錄會出現 <code>.gitnexus/</code> 資料夾，全局 <code>~/.gitnexus/</code> 會記錄 registry：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>.gitnexus 資料夾結構</span> <button class="cb-copy" data-code=".gitnexus/               ← repo 根目錄下，git 自動忽略
+  db/                  ← LadybugDB 圖資料庫
+    graph.db           ← 主圖譜（節點與關係）
+    vectors.db         ← 語義向量索引（--embeddings 時建立）
+  skills/              ← 生成的 Agent Skills（--skills 時建立）
+    exploring.md
+    debugging.md
+    impact-analysis.md
+    refactoring.md
+
+~/.gitnexus/
+  registry.json        ← 全局 repo 登錄（多 repo 管理）" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span>.gitnexus/               ← repo 根目錄下，git 自動忽略</span></span>
+<span class="line"><span>  db/                  ← LadybugDB 圖資料庫</span></span>
+<span class="line"><span>    graph.db           ← 主圖譜（節點與關係）</span></span>
+<span class="line"><span>    vectors.db         ← 語義向量索引（--embeddings 時建立）</span></span>
+<span class="line"><span>  skills/              ← 生成的 Agent Skills（--skills 時建立）</span></span>
+<span class="line"><span>    exploring.md</span></span>
+<span class="line"><span>    debugging.md</span></span>
+<span class="line"><span>    impact-analysis.md</span></span>
+<span class="line"><span>    refactoring.md</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>~/.gitnexus/</span></span>
+<span class="line"><span>  registry.json        ← 全局 repo 登錄（多 repo 管理）</span></span></code></pre> </div> </div>   <div class="call info"> <span class="ci">ℹ️</span> <div> <strong><code>.gitnexus/</code> 不需要提交到 git</strong> <p>GitNexus 執行 <code>analyze</code> 時會自動把 <code>.gitnexus/</code> 加入 <code>.gitignore</code>。圖譜資料是本地計算的產物，不需要版本控制；任何人 clone 你的 repo 後，自己執行 <code>gitnexus analyze</code> 即可重建。</p> </div> </div> <h2>增量索引與 Stale 偵測</h2> <p>GitNexus 會追蹤自上次索引以來的檔案變更，再次執行 <code>gitnexus analyze</code> 時只重新解析變更的檔案，大幅縮短更新時間：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>查看索引狀態與更新</span> <button class="cb-copy" data-code="gitnexus status    # 查看當前 repo 的索引狀態
+# 輸出示例：
+#   Index: current (last updated: 2m ago)
+#   Files: 1,247 indexed
+#   Symbols: 81,400
+#   Stale: No
+
+gitnexus list      # 列出所有已索引的 repo（全局 registry）" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> status</span><span style="color:#7F848E;font-style:italic">    # 查看當前 repo 的索引狀態</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 輸出示例：</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">#   Index: current (last updated: 2m ago)</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">#   Files: 1,247 indexed</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">#   Symbols: 81,400</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">#   Stale: No</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> list</span><span style="color:#7F848E;font-style:italic">      # 列出所有已索引的 repo（全局 registry）</span></span></code></pre> </div> </div>   <table> <thead> <tr> <th>情境</th> <th>建議動作</th> <th>說明</th> </tr> </thead> <tbody> <tr> <td>日常開發後更新索引</td> <td><code>gitnexus analyze</code></td> <td>增量更新，只處理變更檔案</td> </tr> <tr> <td>大型重構後</td> <td><code>gitnexus analyze --force</code></td> <td>強制全量重建，確保圖譜一致性</td> </tr> <tr> <td>切換到不同 branch</td> <td><code>gitnexus analyze</code></td> <td>自動偵測 branch 差異，增量更新</td> </tr> <tr> <td>PostToolUse Hook（Claude Code）</td> <td>自動觸發</td> <td>git commit 後自動提示重新索引，圖譜始終最新</td> </tr> </tbody> </table> <div class="call tip"> <span class="ci">💡</span> <div> <strong>零 Token 消耗的本地計算</strong> <p>整個索引流程——Tree-sitter 解析、跨檔案依賴解析、Leiden 社群偵測、執行流程追蹤，甚至 <code>--embeddings</code> 的語義向量（HuggingFace transformers.js）——全部在你的機器上本地執行，不需要任何 API key，不消耗任何雲端 LLM Token。GitNexus 的「零伺服器（Zero-Server）」架構讓你的程式碼不離開本機。</p> </div> </div> <h2>索引完成後的下一步</h2> <p>索引成功後，你有兩個方向可以繼續：</p> <ul> <li><strong>視覺化探索</strong>：執行 <code>gitnexus serve</code>，用瀏覽器看知識圖譜（第 6 章）</li> <li><strong>接入 AI 編輯器</strong>：執行 <code>gitnexus setup</code> 設定 MCP，讓 Claude Code / Cursor 直接使用圖譜（第 10 章）</li> </ul>  </div> <nav class="cnav" data-astro-cid-mw7aashj> <a href="/gitnexus/ch04-install" class="prev" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>← 上一章</span> <span class="nt" data-astro-cid-mw7aashj>安裝與環境設定</span> </a> <a href="/gitnexus/ch06-web-ui" class="next" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>下一章 →</span> <span class="nt" data-astro-cid-mw7aashj>Web UI 視覺化探索</span> </a> </nav> </main> </div> <script>
+    // Theme
+    const html = document.documentElement;
+    const tt = document.getElementById('tt');
+    const isun = document.getElementById('isun');
+    const imoon = document.getElementById('imoon');
+    function syncIcons() {
+      const dk = html.classList.contains('dark');
+      isun.style.display = dk ? 'block' : 'none';
+      imoon.style.display = dk ? 'none' : 'block';
+    }
+    syncIcons();
+    tt?.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('cc-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      syncIcons();
+    });
+
+    // Progress
+    const pb = document.getElementById('pb');
+    window.addEventListener('scroll', () => {
+      const t = document.documentElement.scrollHeight - window.innerHeight;
+      pb.style.width = t > 0 ? `${(window.scrollY / t) * 100}%` : '0%';
+    }, { passive: true });
+
+    // Sidebar part toggles
+    document.querySelectorAll('.pt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.pid;
+        const list = document.querySelector(`[data-pl="${id}"]`);
+        btn.classList.toggle('open');
+        list?.classList.toggle('closed');
+      });
+    });
+
+    // Mobile menu
+    const sb = document.getElementById('sb');
+    const ov = document.getElementById('ov');
+    const mb = document.getElementById('mbtn');
+    const open = () => { sb.classList.add('open'); ov.classList.add('open'); document.body.style.overflow='hidden'; };
+    const close = () => { sb.classList.remove('open'); ov.classList.remove('open'); document.body.style.overflow=''; };
+    mb?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+  </script> </body> 

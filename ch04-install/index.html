@@ -1,0 +1,121 @@
+<!DOCTYPE html><html lang="zh-TW" data-astro-cid-mw7aashj> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>安裝與環境設定 | </title><link rel="stylesheet" href="/gitnexus/_astro/DocsLayout.BldRaKia.css">
+<style>.cb-wrap[data-astro-cid-jgrc2lfe]{margin-bottom:1.25rem}.cb-bar[data-astro-cid-jgrc2lfe]{display:flex;align-items:center;justify-content:space-between;background:#1a1a2e;border-radius:6px 6px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.05);padding:.18rem .5rem .18rem .75rem;min-height:1.8rem}.cb-label[data-astro-cid-jgrc2lfe]{color:#a6adc8;font-family:Fira Code,Cascadia Code,Consolas,monospace;font-size:.73rem;letter-spacing:.04em}.cb-inner[data-astro-cid-jgrc2lfe] pre{border-radius:0 0 8px 8px!important;margin-bottom:0!important}.cb-copy[data-astro-cid-jgrc2lfe]{background:#ffffff14;color:#888;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:.15rem .55rem;font-size:.7rem;cursor:pointer;transition:all .15s;flex-shrink:0}.cb-copy[data-astro-cid-jgrc2lfe]:hover{background:#ffffff2e;color:#fff}.cb-copy[data-astro-cid-jgrc2lfe].copied{color:#4ec9b0;border-color:#4ec9b0}
+</style></head>GitNexus 完整指南 <meta name="description" content="從零開始安裝 GitNexus：Node.js 18+ 前置環境確認、npm 全局安裝、Windows 環境變數設定與常見安裝問題排查。涵蓋 CLI 本地版、Web UI 純瀏覽器版與 Docker 三種使用模式的選擇建議。"> <link rel="icon" href="/gitnexus/favicon.svg" type="image/svg+xml"> <script>
+    (function () {
+      const s = localStorage.getItem('cc-theme');
+      const d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+    })();
+  </script>  </html> <body data-astro-cid-mw7aashj> <div id="pb" data-astro-cid-mw7aashj></div> <header data-astro-cid-mw7aashj> <div class="hi" data-astro-cid-mw7aashj> <div class="hl" data-astro-cid-mw7aashj> <button id="mbtn" class="ibtn" aria-label="選單" data-astro-cid-mw7aashj> <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" data-astro-cid-mw7aashj></path> </svg> </button> <a href="/gitnexus/" class="site-name" data-astro-cid-mw7aashj> <span class="logo" data-astro-cid-mw7aashj>GN</span>&nbsp;&nbsp;GitNexus 完整指南
+</a> </div> <div class="hr" data-astro-cid-mw7aashj> <button id="tt" class="ibtn" aria-label="切換主題" data-astro-cid-mw7aashj> <svg id="isun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" data-astro-cid-mw7aashj></path> </svg> <svg id="imoon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" data-astro-cid-mw7aashj></path> </svg> </button> </div> </div> </header> <div id="layout" data-astro-cid-mw7aashj> <nav id="sb" data-astro-cid-mw7aashj> <div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="1" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 1：認識 GitNexus</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="1" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch01-what-is-gitnexus" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>1.</span> <span data-astro-cid-mw7aashj>GitNexus 是什麼？零伺服器程式碼智慧引擎</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch02-why-knowledge-graph" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>2.</span> <span data-astro-cid-mw7aashj>AI Coding 的結構盲點：為什麼需要知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch03-graph-vs-rag" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>3.</span> <span data-astro-cid-mw7aashj>知識圖譜 vs Vector RAG vs Graph RAG</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="2" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 2：安裝與快速上手</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="2" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch04-install" class="active" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>4.</span> <span data-astro-cid-mw7aashj>安裝與環境設定</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch05-first-index" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>5.</span> <span data-astro-cid-mw7aashj>索引你的第一個程式碼庫</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch06-web-ui" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>6.</span> <span data-astro-cid-mw7aashj>Web UI 視覺化探索</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="3" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 3：核心架構原理</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="3" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch07-indexing-pipeline" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>7.</span> <span data-astro-cid-mw7aashj>索引管線：從 Tree-sitter AST 到知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch08-ladybugdb-search" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>8.</span> <span data-astro-cid-mw7aashj>LadybugDB 與混合搜尋（BM25 + Semantic + RRF）</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch09-clustering-processes" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>9.</span> <span data-astro-cid-mw7aashj>Leiden 社群偵測與執行流程追蹤</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="4" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 4：MCP 整合與 Agent 實戰</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="4" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch10-mcp-setup" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>10.</span> <span data-astro-cid-mw7aashj>MCP 整合：連接 Claude Code 與各大編輯器</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch11-mcp-tools" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>11.</span> <span data-astro-cid-mw7aashj>16 個 MCP 工具詳解</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch12-skills-hooks" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>12.</span> <span data-astro-cid-mw7aashj>Agent Skills 與 Hooks 自動化工作流</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch13-real-world" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>13.</span> <span data-astro-cid-mw7aashj>實戰場景：PR Review、Bug 定位、安全重構</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="5" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 5：進階應用與生態</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="5" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch14-multi-repo-docker" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>14.</span> <span data-astro-cid-mw7aashj>多倉庫架構與 Docker 部署</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch15-cypher-wiki" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>15.</span> <span data-astro-cid-mw7aashj>Cypher 圖查詢與 Wiki 自動生成</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch16-tool-comparison" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>16.</span> <span data-astro-cid-mw7aashj>競品橫向比較與工具選型</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="6" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 6：附錄</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="6" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/about" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>17.</span> <span data-astro-cid-mw7aashj>關於作者</span>  </a> </li> </ul> </div> </nav> <div id="ov" data-astro-cid-mw7aashj></div> <main data-astro-cid-mw7aashj> <div class="cb" data-astro-cid-mw7aashj>  <span class="clabel">第 4 章 · Part 2：安裝與快速上手</span> <h1>安裝與環境設定</h1> <p class="cdesc">一行 npm 指令開始，三種使用模式任你選</p> <h2>前置需求</h2> <p>GitNexus 是 Node.js 工具，安裝前確認以下環境：</p> <table> <thead> <tr> <th>依賴</th> <th>最低版本</th> <th>說明</th> <th>下載</th> </tr> </thead> <tbody> <tr> <td><strong>Node.js</strong></td> <td>18+（建議 LTS）</td> <td>GitNexus 必需的執行環境</td> <td>nodejs.org</td> </tr> <tr> <td><strong>npm</strong></td> <td>8+</td> <td>Node.js 安裝時一起附帶</td> <td>—</td> </tr> <tr> <td><strong>Git</strong></td> <td>任意版本</td> <td>部分依賴拉取需要；<code>detect_changes</code> 功能需要</td> <td>git-scm.com</td> </tr> </tbody> </table> <p>安裝前先驗證環境：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>驗證前置環境</span> <button class="cb-copy" data-code="# 驗證前置環境（在終端機執行）
+node -v      # 需要 v18 以上
+npm -v       # 需要 v8 以上
+git --version" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 驗證前置環境（在終端機執行）</span></span>
+<span class="line"><span style="color:#61AFEF">node</span><span style="color:#D19A66"> -v</span><span style="color:#7F848E;font-style:italic">      # 需要 v18 以上</span></span>
+<span class="line"><span style="color:#61AFEF">npm</span><span style="color:#D19A66"> -v</span><span style="color:#7F848E;font-style:italic">       # 需要 v8 以上</span></span>
+<span class="line"><span style="color:#61AFEF">git</span><span style="color:#D19A66"> --version</span></span></code></pre> </div> </div>  <script type="module">document.querySelectorAll(".cb-copy").forEach(e=>{e.addEventListener("click",()=>{const t=e.dataset.code;t&&navigator.clipboard.writeText(t).then(()=>{e.textContent="已複製!",e.classList.add("copied"),setTimeout(()=>{e.textContent="複製",e.classList.remove("copied")},2e3)})})});</script> <div class="call tip"> <span class="ci">💡</span> <div> <strong>Windows 安裝 Node.js 記得勾選「Add to PATH」</strong> <p>從官網下載 Node.js 安裝程式時，安裝步驟中務必勾選「Automatically install the necessary tools」以及「Add to PATH」，否則後續執行 <code>npm</code> 指令時可能提示找不到命令。</p> </div> </div> <h2>全局安裝 GitNexus</h2> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>安裝 GitNexus</span> <button class="cb-copy" data-code="# 標準安裝（推薦）
+npm install -g gitnexus
+
+# Windows 常見的依賴衝突問題備案
+npm install -g gitnexus --legacy-peer-deps
+
+# npm 11.x 用戶備案（npx 有 arborist bug）
+pnpm --allow-build=@ladybugdb/core --allow-build=gitnexus --allow-build=tree-sitter dlx gitnexus@latest analyze
+
+# 跳過 optional grammar 編譯（無 C++ 工具鏈時用）
+# 跳過後 Dart/Proto/Swift/Kotlin 解析不可用，其餘語言不受影響
+set GITNEXUS_SKIP_OPTIONAL_GRAMMARS=1
+npm install -g gitnexus" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 標準安裝（推薦）</span></span>
+<span class="line"><span style="color:#61AFEF">npm</span><span style="color:#98C379"> install</span><span style="color:#D19A66"> -g</span><span style="color:#98C379"> gitnexus</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Windows 常見的依賴衝突問題備案</span></span>
+<span class="line"><span style="color:#61AFEF">npm</span><span style="color:#98C379"> install</span><span style="color:#D19A66"> -g</span><span style="color:#98C379"> gitnexus</span><span style="color:#D19A66"> --legacy-peer-deps</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># npm 11.x 用戶備案（npx 有 arborist bug）</span></span>
+<span class="line"><span style="color:#61AFEF">pnpm</span><span style="color:#D19A66"> --allow-build=@ladybugdb/core</span><span style="color:#D19A66"> --allow-build=gitnexus</span><span style="color:#D19A66"> --allow-build=tree-sitter</span><span style="color:#98C379"> dlx</span><span style="color:#98C379"> gitnexus@latest</span><span style="color:#98C379"> analyze</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 跳過 optional grammar 編譯（無 C++ 工具鏈時用）</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 跳過後 Dart/Proto/Swift/Kotlin 解析不可用，其餘語言不受影響</span></span>
+<span class="line"><span style="color:#56B6C2">set</span><span style="color:#98C379"> GITNEXUS_SKIP_OPTIONAL_GRAMMARS=</span><span style="color:#D19A66">1</span></span>
+<span class="line"><span style="color:#61AFEF">npm</span><span style="color:#98C379"> install</span><span style="color:#D19A66"> -g</span><span style="color:#98C379"> gitnexus</span></span></code></pre> </div> </div>   <p>等待安裝完成，終端輸出 <code>added XXX packages in Xs</code> 即表示安裝成功。</p> <h3>安裝驗證</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>驗證安裝</span> <button class="cb-copy" data-code="# 確認安裝成功
+gitnexus --version   # 輸出版本號（如 1.6.x）
+gitnexus --help      # 查看可用指令" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 確認安裝成功</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#D19A66"> --version</span><span style="color:#7F848E;font-style:italic">   # 輸出版本號（如 1.6.x）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#D19A66"> --help</span><span style="color:#7F848E;font-style:italic">      # 查看可用指令</span></span></code></pre> </div> </div>   <h2>Windows 環境變數設定</h2> <p>在 Windows 安裝完成後，如果執行 <code>gitnexus --version</code> 出現「無法識別命令」，需要手動將 npm 全局安裝路徑加入環境變數：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>Windows 環境變數設定</span> <button class="cb-copy" data-code="# 取得 npm 全局安裝路徑
+npm config get prefix
+# 輸出示例：C:Users你的用戶名AppDataRoaming
+pm
+
+# 將此路徑加入 Windows 環境變數 Path：
+# 1. Win+R → 輸入 sysdm.cpl → 進階 → 環境變數
+# 2. 在「用戶變數」的 Path 中新增上面取得的路徑
+# 3. 確定 → 重新開啟終端機" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="powershell"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 取得 npm 全局安裝路徑</span></span>
+<span class="line"><span style="color:#ABB2BF">npm config get prefix</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 輸出示例：C:Users你的用戶名AppDataRoaming</span></span>
+<span class="line"><span style="color:#ABB2BF">pm</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 將此路徑加入 Windows 環境變數 Path：</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 1. Win+R → 輸入 sysdm.cpl → 進階 → 環境變數</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 2. 在「用戶變數」的 Path 中新增上面取得的路徑</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 3. 確定 → 重新開啟終端機</span></span></code></pre> </div> </div>   <h2>三種使用模式</h2> <p>GitNexus 提供三條入口，根據你的使用場景選擇：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>三種模式快速對比</span> <button class="cb-copy" data-code="使用模式對比：
+
+CLI + MCP（日常開發推薦）      Web UI（快速探索）
+────────────────────────────   ──────────────────────
+npm install -g gitnexus        免安裝
+gitnexus analyze               拖入 ZIP 或貼 GitHub URL
+gitnexus setup                 gitnexus.vercel.app
+無 repo 大小限制                ~5,000 檔案（瀏覽器記憶體）
+LadybugDB native（持久化）      LadybugDB WASM（session 內）
+Docker 可自托管                 Bridge 模式連本地 backend" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span>使用模式對比：</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>CLI + MCP（日常開發推薦）      Web UI（快速探索）</span></span>
+<span class="line"><span>────────────────────────────   ──────────────────────</span></span>
+<span class="line"><span>npm install -g gitnexus        免安裝</span></span>
+<span class="line"><span>gitnexus analyze               拖入 ZIP 或貼 GitHub URL</span></span>
+<span class="line"><span>gitnexus setup                 gitnexus.vercel.app</span></span>
+<span class="line"><span>無 repo 大小限制                ~5,000 檔案（瀏覽器記憶體）</span></span>
+<span class="line"><span>LadybugDB native（持久化）      LadybugDB WASM（session 內）</span></span>
+<span class="line"><span>Docker 可自托管                 Bridge 模式連本地 backend</span></span></code></pre> </div> </div>   <table> <thead> <tr> <th>模式</th> <th>適合場景</th> <th>安裝方式</th> <th>repo 大小</th> </tr> </thead> <tbody> <tr> <td><strong>CLI + MCP</strong></td> <td>日常開發，深度整合 Claude Code / Cursor / Codex</td> <td><code>npm install -g gitnexus</code></td> <td>無限制</td> </tr> <tr> <td><strong>Web UI</strong></td> <td>快速探索、Demo、一次性分析；免安裝</td> <td>gitnexus.vercel.app（拖入 ZIP 或貼 URL）</td> <td>~5,000 檔案</td> </tr> <tr> <td><strong>Docker</strong></td> <td>團隊共用、CI/CD 流水線、內網部署</td> <td><code>docker compose up -d</code></td> <td>無限制</td> </tr> </tbody> </table> <div class="call info"> <span class="ci">ℹ️</span> <div> <strong>Bridge 模式：Web UI + CLI 後端</strong> <p>執行 <code>gitnexus serve</code> 啟動本地 HTTP 伺服器（Port 4747），Web UI（gitnexus.vercel.app）會自動偵測並連上，讓你在瀏覽器視覺化介面中使用 CLI 索引的完整大型 repo，突破 5,000 個檔案的瀏覽器記憶體限制。</p> </div> </div> <h2>常見安裝問題排查</h2> <table> <thead> <tr> <th>問題</th> <th>可能原因</th> <th>解決方式</th> </tr> </thead> <tbody> <tr> <td>安裝超時 / 失敗</td> <td>npm 版本衝突或網路問題</td> <td>加上 <code>--legacy-peer-deps</code> 重試；或改用 pnpm</td> </tr> <tr> <td><code>gitnexus: command not found</code></td> <td>npm 全局 bin 目錄不在 PATH 中</td> <td>執行 <code>npm config get prefix</code> 取得路徑並加入環境變數</td> </tr> <tr> <td>C++ 編譯錯誤（tree-sitter-kotlin 等）</td> <td>無 C++ 工具鏈（python3/make/g++）</td> <td>設 <code>GITNEXUS_SKIP_OPTIONAL_GRAMMARS=1</code> 跳過選用語法，或安裝 VS Build Tools</td> </tr> <tr> <td>npm 11.x arborist bug</td> <td>npm 11.x 的 <code>npx</code> 有已知 bug</td> <td>改用 <code>npm install -g gitnexus</code> 全局安裝，或改用 pnpm</td> </tr> <tr> <td>Port 4747 被佔用</td> <td>其他程序已佔用該 port</td> <td>Windows：<code>netstat -ano | findstr :4747</code> 找到 PID 後結束程序</td> </tr> </tbody> </table> <h2>安裝後的下一步</h2> <p>安裝驗證成功後，進入你的專案目錄，執行第一次索引：</p> <table> <thead> <tr> <th>步驟</th> <th>指令</th> <th>說明</th> </tr> </thead> <tbody> <tr> <td>1. 索引程式碼庫</td> <td><code>npx gitnexus analyze</code></td> <td>在 repo 根目錄執行，建立知識圖譜</td> </tr> <tr> <td>2. 設定 MCP（一次性）</td> <td><code>npx gitnexus setup</code></td> <td>自動偵測編輯器，寫入 MCP 配置</td> </tr> <tr> <td>3. 啟動 Web UI（可選）</td> <td><code>gitnexus serve</code></td> <td>Port 4747，搭配瀏覽器視覺化探索</td> </tr> </tbody> </table> <p>第 5 章會詳細說明 <code>gitnexus analyze</code> 的各個參數與索引策略。</p> <div class="call tip"> <span class="ci">💡</span> <div> <strong>推薦：全局安裝 + gitnexus setup</strong> <p>相較於每次用 <code>npx gitnexus@latest</code>，全局安裝後直接執行 <code>gitnexus setup</code> 會寫入絕對路徑的 MCP 配置，啟動更快，不受 <code>npx</code> 冷啟動時間影響（否則可能超過 Claude Code 的 <code>MCP_TIMEOUT</code> 預設值約 30 秒）。</p> </div> </div>  </div> <nav class="cnav" data-astro-cid-mw7aashj> <a href="/gitnexus/ch03-graph-vs-rag" class="prev" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>← 上一章</span> <span class="nt" data-astro-cid-mw7aashj>知識圖譜 vs Vector RAG vs Graph RAG</span> </a> <a href="/gitnexus/ch05-first-index" class="next" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>下一章 →</span> <span class="nt" data-astro-cid-mw7aashj>索引你的第一個程式碼庫</span> </a> </nav> </main> </div> <script>
+    // Theme
+    const html = document.documentElement;
+    const tt = document.getElementById('tt');
+    const isun = document.getElementById('isun');
+    const imoon = document.getElementById('imoon');
+    function syncIcons() {
+      const dk = html.classList.contains('dark');
+      isun.style.display = dk ? 'block' : 'none';
+      imoon.style.display = dk ? 'none' : 'block';
+    }
+    syncIcons();
+    tt?.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('cc-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      syncIcons();
+    });
+
+    // Progress
+    const pb = document.getElementById('pb');
+    window.addEventListener('scroll', () => {
+      const t = document.documentElement.scrollHeight - window.innerHeight;
+      pb.style.width = t > 0 ? `${(window.scrollY / t) * 100}%` : '0%';
+    }, { passive: true });
+
+    // Sidebar part toggles
+    document.querySelectorAll('.pt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.pid;
+        const list = document.querySelector(`[data-pl="${id}"]`);
+        btn.classList.toggle('open');
+        list?.classList.toggle('closed');
+      });
+    });
+
+    // Mobile menu
+    const sb = document.getElementById('sb');
+    const ov = document.getElementById('ov');
+    const mb = document.getElementById('mbtn');
+    const open = () => { sb.classList.add('open'); ov.classList.add('open'); document.body.style.overflow='hidden'; };
+    const close = () => { sb.classList.remove('open'); ov.classList.remove('open'); document.body.style.overflow=''; };
+    mb?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+  </script> </body> 

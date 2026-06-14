@@ -1,0 +1,760 @@
+<!DOCTYPE html><html lang="zh-TW" data-astro-cid-mw7aashj> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>多倉庫架構與 Docker 部署 | </title><link rel="stylesheet" href="/gitnexus/_astro/DocsLayout.BldRaKia.css">
+<style>.cb-wrap[data-astro-cid-jgrc2lfe]{margin-bottom:1.25rem}.cb-bar[data-astro-cid-jgrc2lfe]{display:flex;align-items:center;justify-content:space-between;background:#1a1a2e;border-radius:6px 6px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.05);padding:.18rem .5rem .18rem .75rem;min-height:1.8rem}.cb-label[data-astro-cid-jgrc2lfe]{color:#a6adc8;font-family:Fira Code,Cascadia Code,Consolas,monospace;font-size:.73rem;letter-spacing:.04em}.cb-inner[data-astro-cid-jgrc2lfe] pre{border-radius:0 0 8px 8px!important;margin-bottom:0!important}.cb-copy[data-astro-cid-jgrc2lfe]{background:#ffffff14;color:#888;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:.15rem .55rem;font-size:.7rem;cursor:pointer;transition:all .15s;flex-shrink:0}.cb-copy[data-astro-cid-jgrc2lfe]:hover{background:#ffffff2e;color:#fff}.cb-copy[data-astro-cid-jgrc2lfe].copied{color:#4ec9b0;border-color:#4ec9b0}
+</style></head>GitNexus 完整指南 <meta name="description" content="進入企業級應用：多倉庫 MCP 架構的全局註冊表與 KuzuDB 連接池、跨 repo 查詢與微服務契約提取，以及 Docker 雙簽名映像、docker-compose 與 Kubernetes admission 策略的部署實務，兼談 PolyForm Noncommercial 授權注意事項。"> <link rel="icon" href="/gitnexus/favicon.svg" type="image/svg+xml"> <script>
+    (function () {
+      const s = localStorage.getItem('cc-theme');
+      const d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+    })();
+  </script>  </html> <body data-astro-cid-mw7aashj> <div id="pb" data-astro-cid-mw7aashj></div> <header data-astro-cid-mw7aashj> <div class="hi" data-astro-cid-mw7aashj> <div class="hl" data-astro-cid-mw7aashj> <button id="mbtn" class="ibtn" aria-label="選單" data-astro-cid-mw7aashj> <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" data-astro-cid-mw7aashj></path> </svg> </button> <a href="/gitnexus/" class="site-name" data-astro-cid-mw7aashj> <span class="logo" data-astro-cid-mw7aashj>GN</span>&nbsp;&nbsp;GitNexus 完整指南
+</a> </div> <div class="hr" data-astro-cid-mw7aashj> <button id="tt" class="ibtn" aria-label="切換主題" data-astro-cid-mw7aashj> <svg id="isun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" data-astro-cid-mw7aashj></path> </svg> <svg id="imoon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" data-astro-cid-mw7aashj></path> </svg> </button> </div> </div> </header> <div id="layout" data-astro-cid-mw7aashj> <nav id="sb" data-astro-cid-mw7aashj> <div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="1" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 1：認識 GitNexus</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="1" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch01-what-is-gitnexus" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>1.</span> <span data-astro-cid-mw7aashj>GitNexus 是什麼？零伺服器程式碼智慧引擎</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch02-why-knowledge-graph" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>2.</span> <span data-astro-cid-mw7aashj>AI Coding 的結構盲點：為什麼需要知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch03-graph-vs-rag" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>3.</span> <span data-astro-cid-mw7aashj>知識圖譜 vs Vector RAG vs Graph RAG</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="2" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 2：安裝與快速上手</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="2" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch04-install" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>4.</span> <span data-astro-cid-mw7aashj>安裝與環境設定</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch05-first-index" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>5.</span> <span data-astro-cid-mw7aashj>索引你的第一個程式碼庫</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch06-web-ui" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>6.</span> <span data-astro-cid-mw7aashj>Web UI 視覺化探索</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="3" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 3：核心架構原理</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="3" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch07-indexing-pipeline" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>7.</span> <span data-astro-cid-mw7aashj>索引管線：從 Tree-sitter AST 到知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch08-ladybugdb-search" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>8.</span> <span data-astro-cid-mw7aashj>LadybugDB 與混合搜尋（BM25 + Semantic + RRF）</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch09-clustering-processes" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>9.</span> <span data-astro-cid-mw7aashj>Leiden 社群偵測與執行流程追蹤</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="4" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 4：MCP 整合與 Agent 實戰</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="4" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch10-mcp-setup" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>10.</span> <span data-astro-cid-mw7aashj>MCP 整合：連接 Claude Code 與各大編輯器</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch11-mcp-tools" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>11.</span> <span data-astro-cid-mw7aashj>16 個 MCP 工具詳解</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch12-skills-hooks" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>12.</span> <span data-astro-cid-mw7aashj>Agent Skills 與 Hooks 自動化工作流</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch13-real-world" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>13.</span> <span data-astro-cid-mw7aashj>實戰場景：PR Review、Bug 定位、安全重構</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="5" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 5：進階應用與生態</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="5" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch14-multi-repo-docker" class="active" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>14.</span> <span data-astro-cid-mw7aashj>多倉庫架構與 Docker 部署</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch15-cypher-wiki" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>15.</span> <span data-astro-cid-mw7aashj>Cypher 圖查詢與 Wiki 自動生成</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch16-tool-comparison" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>16.</span> <span data-astro-cid-mw7aashj>競品橫向比較與工具選型</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="6" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 6：附錄</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="6" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/about" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>17.</span> <span data-astro-cid-mw7aashj>關於作者</span>  </a> </li> </ul> </div> </nav> <div id="ov" data-astro-cid-mw7aashj></div> <main data-astro-cid-mw7aashj> <div class="cb" data-astro-cid-mw7aashj>  <span class="clabel">第 14 章 · Part 5：進階應用與生態</span> <h1>多倉庫架構與 Docker 部署</h1> <p class="cdesc">從單一專案到微服務群：企業級的 GitNexus 用法</p> <h2>多倉庫架構概覽</h2> <p>
+GitNexus 天生支援多倉庫。每個 <code>gitnexus analyze</code> 的結果存在各自 repo 的
+<code>.gitnexus/</code> 目錄，同時登記到全局的 <code>~/.gitnexus/registry.json</code>。
+    MCP 伺服器啟動後讀取這個清單，一個 <code>gitnexus mcp</code> 程序即可服務所有已索引的 repo，
+    AI 工具呼叫時加上 <code>repo</code> 參數就能切換目標。
+</p> <h3>全局 Registry</h3> <p>
+Registry 是一份 JSON 清單，記錄每個 repo 的名稱、路徑、索引統計與最後 commit：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>~/.gitnexus/registry.json</span> <button class="cb-copy" data-code="// ~/.gitnexus/registry.json — 全局倉庫清單
+[
+  {
+    &quot;name&quot;: &quot;backend&quot;,
+    &quot;path&quot;: &quot;/Users/porter/projects/backend&quot;,
+    &quot;storagePath&quot;: &quot;/Users/porter/projects/backend/.gitnexus&quot;,
+    &quot;indexedAt&quot;: &quot;2026-06-10T10:30:00.000Z&quot;,
+    &quot;lastCommit&quot;: &quot;a1b2c3d&quot;,
+    &quot;stats&quot;: {
+      &quot;files&quot;: 342,
+      &quot;nodes&quot;: 1248,
+      &quot;edges&quot;: 3891,
+      &quot;processes&quot;: 87,
+      &quot;embeddings&quot;: 1248
+    }
+  },
+  {
+    &quot;name&quot;: &quot;frontend&quot;,
+    &quot;path&quot;: &quot;/Users/porter/projects/frontend&quot;,
+    &quot;storagePath&quot;: &quot;/Users/porter/projects/frontend/.gitnexus&quot;,
+    &quot;indexedAt&quot;: &quot;2026-06-10T09:15:00.000Z&quot;,
+    &quot;lastCommit&quot;: &quot;f4e5d6c&quot;,
+    &quot;stats&quot;: {
+      &quot;files&quot;: 218,
+      &quot;nodes&quot;: 876,
+      &quot;edges&quot;: 2104,
+      &quot;processes&quot;: 52,
+      &quot;embeddings&quot;: 876
+    }
+  }
+]" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="json"><code><span class="line"><span style="color:#7F848E;font-style:italic">// ~/.gitnexus/registry.json — 全局倉庫清單</span></span>
+<span class="line"><span style="color:#ABB2BF">[</span></span>
+<span class="line"><span style="color:#ABB2BF">  {</span></span>
+<span class="line"><span style="color:#E06C75">    "name"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"backend"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    "path"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"/Users/porter/projects/backend"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    "storagePath"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"/Users/porter/projects/backend/.gitnexus"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    "indexedAt"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"2026-06-10T10:30:00.000Z"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    "lastCommit"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"a1b2c3d"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    "stats"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "files"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">342</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "nodes"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">1248</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "edges"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">3891</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "processes"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">87</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "embeddings"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">1248</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  },</span></span>
+<span class="line"><span style="color:#ABB2BF">  {</span></span>
+<span class="line"><span style="color:#E06C75">    "name"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"frontend"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    "path"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"/Users/porter/projects/frontend"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    "storagePath"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"/Users/porter/projects/frontend/.gitnexus"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    "indexedAt"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"2026-06-10T09:15:00.000Z"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    "lastCommit"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"f4e5d6c"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    "stats"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "files"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">218</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "nodes"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">876</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "edges"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">2104</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "processes"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">52</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "embeddings"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">876</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">]</span></span></code></pre> </div> </div>  <script type="module">document.querySelectorAll(".cb-copy").forEach(e=>{e.addEventListener("click",()=>{const t=e.dataset.code;t&&navigator.clipboard.writeText(t).then(()=>{e.textContent="已複製!",e.classList.add("copied"),setTimeout(()=>{e.textContent="複製",e.classList.remove("copied")},2e3)})})});</script> <h3>每個 Repo 的本地儲存</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>per-repo .gitnexus/ 目錄結構</span> <button class="cb-copy" data-code="# 每個 repo 的本地索引結構
+<repo>/.gitnexus/
+  ├── lbug          # LadybugDB 資料庫本體（圖資料）
+  ├── lbug.wal      # Write-Ahead Log（防止資料損毀）
+  ├── lbug.lock     # 寫入鎖（確保單一寫入者）
+  └── meta.json     # 上次索引時間、commit hash、統計數字" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 每個 repo 的本地索引結構</span></span>
+<span class="line"><span style="color:#ABB2BF">&#x3C;repo>/.gitnexus/</span></span>
+<span class="line"><span style="color:#61AFEF">  ├──</span><span style="color:#98C379"> lbug</span><span style="color:#7F848E;font-style:italic">          # LadybugDB 資料庫本體（圖資料）</span></span>
+<span class="line"><span style="color:#61AFEF">  ├──</span><span style="color:#98C379"> lbug.wal</span><span style="color:#7F848E;font-style:italic">      # Write-Ahead Log（防止資料損毀）</span></span>
+<span class="line"><span style="color:#61AFEF">  ├──</span><span style="color:#98C379"> lbug.lock</span><span style="color:#7F848E;font-style:italic">     # 寫入鎖（確保單一寫入者）</span></span>
+<span class="line"><span style="color:#61AFEF">  └──</span><span style="color:#98C379"> meta.json</span><span style="color:#7F848E;font-style:italic">     # 上次索引時間、commit hash、統計數字</span></span></code></pre> </div> </div>   <p>
+索引資料只存在本地——<code>lbug</code> 是 LadybugDB 資料庫本體，
+<code>lbug.wal</code> 是 Write-Ahead Log（保護資料完整性），
+<code>lbug.lock</code> 確保同一時間只有一個寫入者。
+</p> <h2>多倉庫 MCP 操作</h2> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>多倉庫索引與 MCP 啟動</span> <button class="cb-copy" data-code="# 多倉庫管理基本指令
+
+# 1. 分別索引每個 repo（各自注冊到全局 registry）
+cd ~/projects/backend  &amp;&amp;  gitnexus analyze
+cd ~/projects/frontend &amp;&amp;  gitnexus analyze
+cd ~/projects/shared   &amp;&amp;  gitnexus analyze
+
+# 2. 查看所有已索引的 repo
+gitnexus list
+# ● backend   (342 files, 1248 symbols) — current
+# ● frontend  (218 files,  876 symbols) — stale (3 files changed)
+# ● shared    ( 87 files,  412 symbols) — current
+
+# 3. 啟動 MCP 伺服器（自動服務所有已索引的 repo）
+gitnexus mcp
+
+# 4. MCP 工具呼叫時加上 repo 參數鎖定目標
+# &quot;use gitnexus query on backend repo: authentication logic&quot;
+# &quot;use gitnexus impact on frontend: UserCard&quot;" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 多倉庫管理基本指令</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 1. 分別索引每個 repo（各自注冊到全局 registry）</span></span>
+<span class="line"><span style="color:#56B6C2">cd</span><span style="color:#98C379"> ~/projects/backend</span><span style="color:#ABB2BF">  &#x26;&#x26;  </span><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span></span>
+<span class="line"><span style="color:#56B6C2">cd</span><span style="color:#98C379"> ~/projects/frontend</span><span style="color:#ABB2BF"> &#x26;&#x26;  </span><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span></span>
+<span class="line"><span style="color:#56B6C2">cd</span><span style="color:#98C379"> ~/projects/shared</span><span style="color:#ABB2BF">   &#x26;&#x26;  </span><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 2. 查看所有已索引的 repo</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> list</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ● backend   (342 files, 1248 symbols) — current</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ● frontend  (218 files,  876 symbols) — stale (3 files changed)</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ● shared    ( 87 files,  412 symbols) — current</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 3. 啟動 MCP 伺服器（自動服務所有已索引的 repo）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> mcp</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 4. MCP 工具呼叫時加上 repo 參數鎖定目標</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># "use gitnexus query on backend repo: authentication logic"</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># "use gitnexus impact on frontend: UserCard"</span></span></code></pre> </div> </div>   <h3>repo 參數的三種解析方式</h3> <p>
+所有 MCP 工具都接受可選的 <code>repo</code> 參數，支援三種寫法：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>MCP 工具的 repo 參數</span> <button class="cb-copy" data-code="# MCP 工具的 repo 參數：三種解析方式
+
+# 方式 1：用 registry 名稱（最簡潔）
+query({ query: &quot;authentication&quot;, repo: &quot;backend&quot; })
+context({ name: &quot;validateUser&quot;,  repo: &quot;frontend&quot; })
+impact({ target: &quot;AuthService&quot;,  direction: &quot;upstream&quot;, repo: &quot;shared&quot; })
+
+# 方式 2：用絕對路徑（同名衝突時必用）
+query({ query: &quot;auth&quot;, repo: &quot;/Users/porter/work/backend&quot; })
+query({ query: &quot;auth&quot;, repo: &quot;/Users/porter/personal/backend&quot; })
+
+# 方式 3：查看所有已索引 repo 清單
+# MCP 工具：&quot;use gitnexus list_repos&quot;
+# 或讀取 MCP 資源：gitnexus://repos" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="typescript"><code><span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E5C07B">MCP</span><span style="color:#E06C75"> 工具的</span><span style="color:#E06C75"> repo</span><span style="color:#E06C75"> 參數</span><span style="color:#ABB2BF">：</span><span style="color:#E06C75">三種解析方式</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">方式</span><span style="color:#D19A66"> 1</span><span style="color:#ABB2BF">：</span><span style="color:#E06C75">用</span><span style="color:#E06C75"> registry</span><span style="color:#E06C75"> 名稱</span><span style="color:#ABB2BF">（</span><span style="color:#E06C75">最簡潔</span><span style="color:#ABB2BF">）</span></span>
+<span class="line"><span style="color:#61AFEF">query</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">query</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"authentication"</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">repo</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"backend"</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"><span style="color:#61AFEF">context</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"validateUser"</span><span style="color:#ABB2BF">,  </span><span style="color:#E06C75">repo</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"frontend"</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"><span style="color:#61AFEF">impact</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">target</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"AuthService"</span><span style="color:#ABB2BF">,  </span><span style="color:#E06C75">direction</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"upstream"</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">repo</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"shared"</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">方式</span><span style="color:#D19A66"> 2</span><span style="color:#ABB2BF">：</span><span style="color:#E06C75">用絕對路徑</span><span style="color:#ABB2BF">（</span><span style="color:#E06C75">同名衝突時必用</span><span style="color:#ABB2BF">）</span></span>
+<span class="line"><span style="color:#61AFEF">query</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">query</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"auth"</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">repo</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"/Users/porter/work/backend"</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"><span style="color:#61AFEF">query</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">query</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"auth"</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">repo</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"/Users/porter/personal/backend"</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">方式</span><span style="color:#D19A66"> 3</span><span style="color:#ABB2BF">：</span><span style="color:#E06C75">查看所有已索引</span><span style="color:#E06C75"> repo</span><span style="color:#E06C75"> 清單</span></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E5C07B">MCP</span><span style="color:#E06C75"> 工具</span><span style="color:#ABB2BF">：</span><span style="color:#98C379">"use gitnexus list_repos"</span></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">或讀取</span><span style="color:#E5C07B"> MCP</span><span style="color:#E06C75"> 資源</span><span style="color:#ABB2BF">：</span><span style="color:#E06C75">gitnexus</span><span style="color:#ABB2BF">:</span><span style="color:#7F848E;font-style:italic">//repos</span></span></code></pre> </div> </div>   <div class="call tip"> <span class="ci">💡</span> <div> <strong>同名衝突時用絕對路徑</strong> <p>
+如果你在工作目錄和個人目錄都有名為 <code>backend</code> 的 repo，
+<code>repo: "backend"</code> 會優先匹配名稱；衝突時，改用
+<code>repo: "/Users/porter/work/backend"</code> 指定完整路徑。
+</p> </div> </div> <h2>Group 系統：跨 Repo 契約分析</h2> <p>
+多個獨立 repo 查詢只是「切換目標」，並非真正的跨服務分析。
+    GitNexus 的 <strong>Group 系統</strong>更進一步：把多個相互依賴的 repo 組成群組，
+    自動偵測 HTTP routes、gRPC endpoints、Kafka topics、shared libs 的跨服務契約，
+    讓 AI 可以追蹤跨越服務邊界的呼叫鏈。
+</p> <h3>group.yaml 格式</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>group.yaml — 多倉庫群組配置</span> <button class="cb-copy" data-code="# ~/.gitnexus/groups/my-platform/group.yaml
+version: 1
+name: my-platform
+description: &quot;電商平台微服務群&quot;
+
+repos:
+  auth/backend:   auth-service      # groupPath: registryName（階層路徑: registry 名稱）
+  orders/api:     orders-service
+  payments/api:   payments-service
+  frontend/web:   web-app
+
+links:                              # 手動宣告的契約（逃生艙：自動偵測偵測不到時用）
+  - from: orders/api
+    to:   auth/backend
+    type: grpc                      # http | grpc | thrift | topic | lib | custom
+    contract: &quot;auth.AuthService/Login&quot;
+    role: provider                  # provider | consumer
+
+detect:
+  http: true
+  grpc: true
+  thrift: true
+  topics: true                      # Kafka / NATS topic 追蹤
+  shared_libs: true
+  embedding_fallback: true          # 找不到靜態契約時用語義向量推測
+  includes: false                   # opt-in：C/C++ #include 追蹤
+  workspace_deps: false             # opt-in：Go/Elixir workspace 依賴
+
+matching:
+  bm25_threshold:       0.7
+  embedding_threshold:  0.65
+  max_candidates_per_step: 3
+  exclude_links_paths:  [&quot;/health&quot;, &quot;/ready&quot;]" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="yaml"><code><span class="line"><span style="color:#7F848E;font-style:italic"># ~/.gitnexus/groups/my-platform/group.yaml</span></span>
+<span class="line"><span style="color:#E06C75">version</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">1</span></span>
+<span class="line"><span style="color:#E06C75">name</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">my-platform</span></span>
+<span class="line"><span style="color:#E06C75">description</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"電商平台微服務群"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E06C75">repos</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">  auth/backend</span><span style="color:#ABB2BF">:   </span><span style="color:#98C379">auth-service</span><span style="color:#7F848E;font-style:italic">      # groupPath: registryName（階層路徑: registry 名稱）</span></span>
+<span class="line"><span style="color:#E06C75">  orders/api</span><span style="color:#ABB2BF">:     </span><span style="color:#98C379">orders-service</span></span>
+<span class="line"><span style="color:#E06C75">  payments/api</span><span style="color:#ABB2BF">:   </span><span style="color:#98C379">payments-service</span></span>
+<span class="line"><span style="color:#E06C75">  frontend/web</span><span style="color:#ABB2BF">:   </span><span style="color:#98C379">web-app</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E06C75">links</span><span style="color:#ABB2BF">:                              </span><span style="color:#7F848E;font-style:italic"># 手動宣告的契約（逃生艙：自動偵測偵測不到時用）</span></span>
+<span class="line"><span style="color:#ABB2BF">  - </span><span style="color:#E06C75">from</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">orders/api</span></span>
+<span class="line"><span style="color:#E06C75">    to</span><span style="color:#ABB2BF">:   </span><span style="color:#98C379">auth/backend</span></span>
+<span class="line"><span style="color:#E06C75">    type</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">grpc</span><span style="color:#7F848E;font-style:italic">                      # http | grpc | thrift | topic | lib | custom</span></span>
+<span class="line"><span style="color:#E06C75">    contract</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"auth.AuthService/Login"</span></span>
+<span class="line"><span style="color:#E06C75">    role</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">provider</span><span style="color:#7F848E;font-style:italic">                  # provider | consumer</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E06C75">detect</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">  http</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span></span>
+<span class="line"><span style="color:#E06C75">  grpc</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span></span>
+<span class="line"><span style="color:#E06C75">  thrift</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span></span>
+<span class="line"><span style="color:#E06C75">  topics</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span><span style="color:#7F848E;font-style:italic">                      # Kafka / NATS topic 追蹤</span></span>
+<span class="line"><span style="color:#E06C75">  shared_libs</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span></span>
+<span class="line"><span style="color:#E06C75">  embedding_fallback</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span><span style="color:#7F848E;font-style:italic">          # 找不到靜態契約時用語義向量推測</span></span>
+<span class="line"><span style="color:#E06C75">  includes</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">false</span><span style="color:#7F848E;font-style:italic">                   # opt-in：C/C++ #include 追蹤</span></span>
+<span class="line"><span style="color:#E06C75">  workspace_deps</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">false</span><span style="color:#7F848E;font-style:italic">             # opt-in：Go/Elixir workspace 依賴</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E06C75">matching</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">  bm25_threshold</span><span style="color:#ABB2BF">:       </span><span style="color:#D19A66">0.7</span></span>
+<span class="line"><span style="color:#E06C75">  embedding_threshold</span><span style="color:#ABB2BF">:  </span><span style="color:#D19A66">0.65</span></span>
+<span class="line"><span style="color:#E06C75">  max_candidates_per_step</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">3</span></span>
+<span class="line"><span style="color:#E06C75">  exclude_links_paths</span><span style="color:#ABB2BF">:  [</span><span style="color:#98C379">"/health"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"/ready"</span><span style="color:#ABB2BF">]</span></span></code></pre> </div> </div>   <h3>群組管理指令</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>群組完整操作流程</span> <button class="cb-copy" data-code="# 群組管理指令（完整流程）
+
+# 1. 建立群組
+gitnexus group create my-platform
+
+# 2. 加入 repo（groupPath: 階層路徑, registryName: registry 中的名稱）
+gitnexus group add my-platform auth/backend   auth-service
+gitnexus group add my-platform orders/api     orders-service
+gitnexus group add my-platform payments/api   payments-service
+gitnexus group add my-platform frontend/web   web-app
+
+# 3. 同步群組（提取契約 + 跨 repo 比對）
+gitnexus group sync my-platform
+# → 分析每個 repo 暴露的 HTTP routes、gRPC endpoints、函式介面
+# → 跨 repo 比對：找出 A 呼叫而 B 定義的跨服務連結
+# → 寫入 ~/.gitnexus/groups/my-platform/contracts.json
+
+# 4. 查看契約
+gitnexus group contracts my-platform
+# grpc::auth.AuthService/Login    orders/api → auth/backend
+# http::POST::/payments/charge    orders/api → payments/api
+# topic::order.created            orders/api → frontend/web
+
+# 5. 查看群組狀態（哪些 repo 需要重新索引）
+gitnexus group status my-platform
+
+# 6. 移除某個 repo
+gitnexus group remove my-platform orders/api" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 群組管理指令（完整流程）</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 1. 建立群組</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> create</span><span style="color:#98C379"> my-platform</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 2. 加入 repo（groupPath: 階層路徑, registryName: registry 中的名稱）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> add</span><span style="color:#98C379"> my-platform</span><span style="color:#98C379"> auth/backend</span><span style="color:#98C379">   auth-service</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> add</span><span style="color:#98C379"> my-platform</span><span style="color:#98C379"> orders/api</span><span style="color:#98C379">     orders-service</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> add</span><span style="color:#98C379"> my-platform</span><span style="color:#98C379"> payments/api</span><span style="color:#98C379">   payments-service</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> add</span><span style="color:#98C379"> my-platform</span><span style="color:#98C379"> frontend/web</span><span style="color:#98C379">   web-app</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 3. 同步群組（提取契約 + 跨 repo 比對）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> sync</span><span style="color:#98C379"> my-platform</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># → 分析每個 repo 暴露的 HTTP routes、gRPC endpoints、函式介面</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># → 跨 repo 比對：找出 A 呼叫而 B 定義的跨服務連結</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># → 寫入 ~/.gitnexus/groups/my-platform/contracts.json</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 4. 查看契約</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> contracts</span><span style="color:#98C379"> my-platform</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># grpc::auth.AuthService/Login    orders/api → auth/backend</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># http::POST::/payments/charge    orders/api → payments/api</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># topic::order.created            orders/api → frontend/web</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 5. 查看群組狀態（哪些 repo 需要重新索引）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> status</span><span style="color:#98C379"> my-platform</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 6. 移除某個 repo</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> remove</span><span style="color:#98C379"> my-platform</span><span style="color:#98C379"> orders/api</span></span></code></pre> </div> </div>   <h3>跨 Repo 查詢語法</h3> <p>
+群組建立後，在 MCP 工具的 <code>repo</code> 參數前加 <code>@</code>
+即可把查詢廣播到整個群組，GitNexus 用 Reciprocal Rank Fusion（RRF）合併各 repo 的結果：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>群組跨 repo 查詢</span> <button class="cb-copy" data-code="# 跨 repo 群組查詢
+
+# 在整個群組內搜尋（RRF 融合排名）
+query({ query: &quot;authentication flow&quot;, repo: &quot;@my-platform&quot; })
+
+# 鎖定群組內某個成員
+impact({ target: &quot;AuthService&quot;, direction: &quot;upstream&quot;, repo: &quot;@my-platform/auth/backend&quot; })
+
+# 跨服務查詢時加上 service 範圍（monorepo 特別有用）
+query({ query: &quot;auth&quot;, repo: &quot;@my-platform&quot;, service: &quot;auth/backend&quot; })
+
+# 群組 MCP 資源
+# gitnexus://group/my-platform/contracts   ← 合約清單
+# gitnexus://group/my-platform/status      ← 每個 repo 的 stale 狀態" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="typescript"><code><span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">跨</span><span style="color:#E06C75"> repo</span><span style="color:#E06C75"> 群組查詢</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">在整個群組內搜尋</span><span style="color:#ABB2BF">（</span><span style="color:#E5C07B">RRF</span><span style="color:#E06C75"> 融合排名</span><span style="color:#ABB2BF">）</span></span>
+<span class="line"><span style="color:#61AFEF">query</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">query</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"authentication flow"</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">repo</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"@my-platform"</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">鎖定群組內某個成員</span></span>
+<span class="line"><span style="color:#61AFEF">impact</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">target</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"AuthService"</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">direction</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"upstream"</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">repo</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"@my-platform/auth/backend"</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">跨服務查詢時加上</span><span style="color:#E06C75"> service</span><span style="color:#E06C75"> 範圍</span><span style="color:#ABB2BF">（</span><span style="color:#E06C75">monorepo</span><span style="color:#E06C75"> 特別有用</span><span style="color:#ABB2BF">）</span></span>
+<span class="line"><span style="color:#61AFEF">query</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">query</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"auth"</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">repo</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"@my-platform"</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">service</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"auth/backend"</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">群組</span><span style="color:#E5C07B"> MCP</span><span style="color:#E06C75"> 資源</span></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">gitnexus</span><span style="color:#ABB2BF">:</span><span style="color:#7F848E;font-style:italic">//group/my-platform/contracts   ← 合約清單</span></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">gitnexus</span><span style="color:#ABB2BF">:</span><span style="color:#7F848E;font-style:italic">//group/my-platform/status      ← 每個 repo 的 stale 狀態</span></span></code></pre> </div> </div>   <table> <thead> <tr> <th>契約類型</th> <th>自動偵測範例</th> <th>group.yaml detect 選項</th> </tr> </thead> <tbody> <tr> <td>HTTP REST</td> <td><code>http::POST::/payments/charge</code></td> <td><code>http: true</code></td> </tr> <tr> <td>gRPC</td> <td><code>grpc::auth.AuthService/Login</code></td> <td><code>grpc: true</code></td> </tr> <tr> <td>Kafka Topic</td> <td><code>topic::order.created</code></td> <td><code>topics: true</code></td> </tr> <tr> <td>共用函式庫</td> <td><code>lib::@mycompany/utils</code></td> <td><code>shared_libs: true</code></td> </tr> <tr> <td>語義推測</td> <td>靜態分析無法確定時</td> <td><code>embedding_fallback: true</code></td> </tr> </tbody> </table> <h2>Docker 部署</h2> <h3>官方映像</h3> <table> <thead> <tr> <th>元件</th> <th>GHCR（官方）</th> <th>Docker Hub（鏡像）</th> </tr> </thead> <tbody> <tr> <td>CLI / Server</td> <td><code>ghcr.io/abhigyanpatwari/gitnexus:latest</code></td> <td><code>akonlabs/gitnexus:latest</code></td> </tr> <tr> <td>Web UI</td> <td><code>ghcr.io/abhigyanpatwari/gitnexus-web:latest</code></td> <td><code>akonlabs/gitnexus-web:latest</code></td> </tr> </tbody> </table> <div class="call tip"> <span class="ci">💡</span> <div> <strong>生產環境用固定版本標籤</strong> <p>
+生產部署請避免 <code>:latest</code>，改用 <code>:1.6.2</code> 這類固定版本號，
+        確保不因非預期升級改變行為。每次升版前在暫存環境驗證索引相容性。
+</p> </div> </div> <h3>官方 docker-compose</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>docker-compose.yaml</span> <button class="cb-copy" data-code="# docker-compose.yaml（官方範本，repo 根目錄）
+services:
+  gitnexus-server:
+    image: ${SERVER_IMAGE:-ghcr.io/abhigyanpatwari/gitnexus:latest}
+    container_name: ${SERVER_CONTAINER_NAME:-gitnexus-server}
+    ports:
+      - '${SERVER_HOST_PORT:-4747}:4747'
+    volumes:
+      - gitnexus-data:/data/gitnexus        # 持久化索引資料
+      - ${WORKSPACE_DIR:-./workspace}:/workspace:ro   # 掛載原始碼（唯讀）
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4747/api/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  gitnexus-web:
+    image: ${WEB_IMAGE:-ghcr.io/abhigyanpatwari/gitnexus-web:latest}
+    container_name: ${WEB_CONTAINER_NAME:-gitnexus-web}
+    ports:
+      - '${WEB_HOST_PORT:-4173}:4173'
+    environment:
+      - GITNEXUS_BACKEND_URL=${GITNEXUS_BACKEND_URL:-}
+    depends_on:
+      gitnexus-server:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4173/']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  gitnexus-data:" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="yaml"><code><span class="line"><span style="color:#7F848E;font-style:italic"># docker-compose.yaml（官方範本，repo 根目錄）</span></span>
+<span class="line"><span style="color:#E06C75">services</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">  gitnexus-server</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">    image</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">${SERVER_IMAGE:-ghcr.io/abhigyanpatwari/gitnexus:latest}</span></span>
+<span class="line"><span style="color:#E06C75">    container_name</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">${SERVER_CONTAINER_NAME:-gitnexus-server}</span></span>
+<span class="line"><span style="color:#E06C75">    ports</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">'${SERVER_HOST_PORT:-4747}:4747'</span></span>
+<span class="line"><span style="color:#E06C75">    volumes</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">gitnexus-data:/data/gitnexus</span><span style="color:#7F848E;font-style:italic">        # 持久化索引資料</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">${WORKSPACE_DIR:-./workspace}:/workspace:ro</span><span style="color:#7F848E;font-style:italic">   # 掛載原始碼（唯讀）</span></span>
+<span class="line"><span style="color:#E06C75">    restart</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">unless-stopped</span></span>
+<span class="line"><span style="color:#E06C75">    healthcheck</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">      test</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">'CMD'</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">'curl'</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">'-f'</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">'http://localhost:4747/api/health'</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#E06C75">      interval</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">30s</span></span>
+<span class="line"><span style="color:#E06C75">      timeout</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">5s</span></span>
+<span class="line"><span style="color:#E06C75">      retries</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">3</span></span>
+<span class="line"><span style="color:#E06C75">      start_period</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">15s</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E06C75">  gitnexus-web</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">    image</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">${WEB_IMAGE:-ghcr.io/abhigyanpatwari/gitnexus-web:latest}</span></span>
+<span class="line"><span style="color:#E06C75">    container_name</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">${WEB_CONTAINER_NAME:-gitnexus-web}</span></span>
+<span class="line"><span style="color:#E06C75">    ports</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">'${WEB_HOST_PORT:-4173}:4173'</span></span>
+<span class="line"><span style="color:#E06C75">    environment</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">GITNEXUS_BACKEND_URL=${GITNEXUS_BACKEND_URL:-}</span></span>
+<span class="line"><span style="color:#E06C75">    depends_on</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">      gitnexus-server</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">        condition</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">service_healthy</span></span>
+<span class="line"><span style="color:#E06C75">    restart</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">unless-stopped</span></span>
+<span class="line"><span style="color:#E06C75">    healthcheck</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">      test</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">'CMD'</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">'curl'</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">'-f'</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">'http://localhost:4173/'</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#E06C75">      interval</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">30s</span></span>
+<span class="line"><span style="color:#E06C75">      timeout</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">5s</span></span>
+<span class="line"><span style="color:#E06C75">      retries</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">3</span></span>
+<span class="line"><span style="color:#E06C75">      start_period</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">10s</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E06C75">volumes</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">  gitnexus-data</span><span style="color:#ABB2BF">:</span></span></code></pre> </div> </div>   <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>啟動與操作指令</span> <button class="cb-copy" data-code="# 啟動（指定工作區目錄）
+WORKSPACE_DIR=$HOME/code docker compose up -d
+
+# 在容器內對某個 repo 建立索引
+docker compose exec gitnexus-server gitnexus index /workspace/backend
+docker compose exec gitnexus-server gitnexus index /workspace/frontend
+
+# 使用 .env 檔案覆蓋預設值
+cp .env.example .env
+# 編輯 .env 後：
+docker compose --env-file .env up -d
+
+# 查看 server 日誌
+docker compose logs -f gitnexus-server" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 啟動（指定工作區目錄）</span></span>
+<span class="line"><span style="color:#E06C75">WORKSPACE_DIR</span><span style="color:#56B6C2">=</span><span style="color:#E06C75">$HOME</span><span style="color:#98C379">/code</span><span style="color:#61AFEF"> docker</span><span style="color:#98C379"> compose</span><span style="color:#98C379"> up</span><span style="color:#D19A66"> -d</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 在容器內對某個 repo 建立索引</span></span>
+<span class="line"><span style="color:#61AFEF">docker</span><span style="color:#98C379"> compose</span><span style="color:#98C379"> exec</span><span style="color:#98C379"> gitnexus-server</span><span style="color:#98C379"> gitnexus</span><span style="color:#98C379"> index</span><span style="color:#98C379"> /workspace/backend</span></span>
+<span class="line"><span style="color:#61AFEF">docker</span><span style="color:#98C379"> compose</span><span style="color:#98C379"> exec</span><span style="color:#98C379"> gitnexus-server</span><span style="color:#98C379"> gitnexus</span><span style="color:#98C379"> index</span><span style="color:#98C379"> /workspace/frontend</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 使用 .env 檔案覆蓋預設值</span></span>
+<span class="line"><span style="color:#61AFEF">cp</span><span style="color:#98C379"> .env.example</span><span style="color:#98C379"> .env</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 編輯 .env 後：</span></span>
+<span class="line"><span style="color:#61AFEF">docker</span><span style="color:#98C379"> compose</span><span style="color:#D19A66"> --env-file</span><span style="color:#98C379"> .env</span><span style="color:#98C379"> up</span><span style="color:#D19A66"> -d</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 查看 server 日誌</span></span>
+<span class="line"><span style="color:#61AFEF">docker</span><span style="color:#98C379"> compose</span><span style="color:#98C379"> logs</span><span style="color:#D19A66"> -f</span><span style="color:#98C379"> gitnexus-server</span></span></code></pre> </div> </div>   <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>.env 常用覆蓋選項</span> <button class="cb-copy" data-code="# .env 常用覆蓋選項
+SERVER_IMAGE=ghcr.io/abhigyanpatwari/gitnexus:1.6.2   # 固定版本（生產推薦）
+WEB_IMAGE=ghcr.io/abhigyanpatwari/gitnexus-web:1.6.2
+SERVER_HOST_PORT=4747
+WEB_HOST_PORT=4173
+WORKSPACE_DIR=/mnt/codebase                            # NFS 或本地掛載路徑
+GITNEXUS_BACKEND_URL=http://gitnexus-server:4747       # 容器內部互連" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># .env 常用覆蓋選項</span></span>
+<span class="line"><span style="color:#E06C75">SERVER_IMAGE</span><span style="color:#56B6C2">=</span><span style="color:#98C379">ghcr.io/abhigyanpatwari/gitnexus:1.6.2</span><span style="color:#7F848E;font-style:italic">   # 固定版本（生產推薦）</span></span>
+<span class="line"><span style="color:#E06C75">WEB_IMAGE</span><span style="color:#56B6C2">=</span><span style="color:#98C379">ghcr.io/abhigyanpatwari/gitnexus-web:1.6.2</span></span>
+<span class="line"><span style="color:#E06C75">SERVER_HOST_PORT</span><span style="color:#56B6C2">=</span><span style="color:#98C379">4747</span></span>
+<span class="line"><span style="color:#E06C75">WEB_HOST_PORT</span><span style="color:#56B6C2">=</span><span style="color:#98C379">4173</span></span>
+<span class="line"><span style="color:#E06C75">WORKSPACE_DIR</span><span style="color:#56B6C2">=</span><span style="color:#98C379">/mnt/codebase</span><span style="color:#7F848E;font-style:italic">                            # NFS 或本地掛載路徑</span></span>
+<span class="line"><span style="color:#E06C75">GITNEXUS_BACKEND_URL</span><span style="color:#56B6C2">=</span><span style="color:#98C379">http://gitnexus-server:4747</span><span style="color:#7F848E;font-style:italic">       # 容器內部互連</span></span></code></pre> </div> </div>   <h3>All-in-One 映像（第三方）</h3> <p>
+若想最簡單地用 Docker 啟動一個全功能 GitNexus（MCP + Web UI + HTTP API），
+    社群維護的 <code>mekayelanik/gitnexus-mcp</code> 映像透過 HAProxy 把三個服務整合到單一埠口：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>all-in-one docker-compose（第三方映像）</span> <button class="cb-copy" data-code="# 第三方 all-in-one 映像（mekayelanik/gitnexus-mcp）
+# 單一容器 + HAProxy：MCP + Web UI + HTTP API 全整合
+
+services:
+  gitnexus-mcp:
+    image: mekayelanik/gitnexus-mcp:latest
+    container_name: gitnexus-mcp
+    restart: unless-stopped
+    ports:
+      - &quot;8010:8010&quot;          # 統一入口（HAProxy 代理）
+    volumes:
+      - /path/to/repos:/data:rw             # 原始碼（可讀寫，供自動重新索引）
+      - gitnexus-registry:/home/node/.gitnexus
+      - gitnexus-cache:/home/node/.cache
+    environment:
+      - PORT=8010
+      - DATA_DIR=/data
+      - NODE_ENV=production
+      - API_KEY=your_bearer_token           # 可選：API 鑰匙保護
+      - ANALYZE_EMBEDDINGS=false            # false 加快索引速度
+      - WIKI_ENABLED=false                  # 需要 OpenAI API key 才開
+      # - OPENAI_API_KEY=sk-...            # wiki 功能需要
+      - TZ=Asia/Taipei
+      - PUID=1000
+      - PGID=1000
+volumes:
+  gitnexus-registry:
+  gitnexus-cache:" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="yaml"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 第三方 all-in-one 映像（mekayelanik/gitnexus-mcp）</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 單一容器 + HAProxy：MCP + Web UI + HTTP API 全整合</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E06C75">services</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">  gitnexus-mcp</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">    image</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">mekayelanik/gitnexus-mcp:latest</span></span>
+<span class="line"><span style="color:#E06C75">    container_name</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">gitnexus-mcp</span></span>
+<span class="line"><span style="color:#E06C75">    restart</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">unless-stopped</span></span>
+<span class="line"><span style="color:#E06C75">    ports</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">"8010:8010"</span><span style="color:#7F848E;font-style:italic">          # 統一入口（HAProxy 代理）</span></span>
+<span class="line"><span style="color:#E06C75">    volumes</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">/path/to/repos:/data:rw</span><span style="color:#7F848E;font-style:italic">             # 原始碼（可讀寫，供自動重新索引）</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">gitnexus-registry:/home/node/.gitnexus</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">gitnexus-cache:/home/node/.cache</span></span>
+<span class="line"><span style="color:#E06C75">    environment</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">PORT=8010</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">DATA_DIR=/data</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">NODE_ENV=production</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">API_KEY=your_bearer_token</span><span style="color:#7F848E;font-style:italic">           # 可選：API 鑰匙保護</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">ANALYZE_EMBEDDINGS=false</span><span style="color:#7F848E;font-style:italic">            # false 加快索引速度</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">WIKI_ENABLED=false</span><span style="color:#7F848E;font-style:italic">                  # 需要 OpenAI API key 才開</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">      # - OPENAI_API_KEY=sk-...            # wiki 功能需要</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">TZ=Asia/Taipei</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">PUID=1000</span></span>
+<span class="line"><span style="color:#ABB2BF">      - </span><span style="color:#98C379">PGID=1000</span></span>
+<span class="line"><span style="color:#E06C75">volumes</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">  gitnexus-registry</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">  gitnexus-cache</span><span style="color:#ABB2BF">:</span></span></code></pre> </div> </div>   <div class="call info"> <span class="ci">ℹ️</span> <div> <strong>All-in-one 映像的內部結構</strong> <p> <code>mekayelanik/gitnexus-mcp</code> 在容器內運行 HAProxy，
+        統一代理到 4747（Web UI）、39012（靜態檔案）、38011（HAProxy 內部）。
+        對外只暴露單一埠口（預設 8010），適合不想管理多個容器的情境。
+        注意這是社群非官方映像，升版需自行追蹤原始映像更新。
+</p> </div> </div> <h2>LadybugDB 連接池</h2> <p>
+GitNexus MCP 伺服器（<code>LocalBackend</code>）內建 LadybugDB 連接池，
+    不需要額外設定，但了解其行為有助於排查問題：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>LadybugDB 連接池行為</span> <button class="cb-copy" data-code="# LadybugDB 連接池（LocalBackend 內建，不可設定）
+
+最大並行開啟連線數：5 個
+冷啟動延遲：          ~50ms（首次開啟資料庫）
+暖啟動延遲：           ~5ms（已開啟、快取中）
+閒置驅逐時間：        5 分鐘無查詢自動關閉
+關機時：              自動 CHECKPOINT 並清理
+
+⚠️ 已知問題（Issue #1480）：
+  gitnexus serve（HTTP 模式）在同一個 process 切換多個 repo 時，
+  前一個 session 若未執行 CHECKPOINT 就關閉，lbug.wal 會留下髒頁。
+  錯誤訊息：UNREACHABLE_CODE in wal_record.cpp:76
+
+✓ 建議做法：
+  • 生產環境優先使用 gitnexus mcp（stdio MCP 模式），此問題不存在
+  • 若必須用 HTTP 模式，每個 repo 起一個獨立的 gitnexus serve 程序" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># LadybugDB 連接池（LocalBackend 內建，不可設定）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>最大並行開啟連線數：5 個</span></span>
+<span class="line"><span>冷啟動延遲：          ~50ms（首次開啟資料庫）</span></span>
+<span class="line"><span>暖啟動延遲：           ~5ms（已開啟、快取中）</span></span>
+<span class="line"><span>閒置驅逐時間：        5 分鐘無查詢自動關閉</span></span>
+<span class="line"><span>關機時：              自動 CHECKPOINT 並清理</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>⚠️ 已知問題（Issue #1480）：</span></span>
+<span class="line"><span>  gitnexus serve（HTTP 模式）在同一個 process 切換多個 repo 時，</span></span>
+<span class="line"><span>  前一個 session 若未執行 CHECKPOINT 就關閉，lbug.wal 會留下髒頁。</span></span>
+<span class="line"><span>  錯誤訊息：UNREACHABLE_CODE in wal_record.cpp:76</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>✓ 建議做法：</span></span>
+<span class="line"><span>  • 生產環境優先使用 gitnexus mcp（stdio MCP 模式），此問題不存在</span></span>
+<span class="line"><span>  • 若必須用 HTTP 模式，每個 repo 起一個獨立的 gitnexus serve 程序</span></span></code></pre> </div> </div>   <div class="call warn"> <span class="ci">⚠️</span> <div> <strong>HTTP 模式的 WAL 殘留問題</strong> <p> <code>gitnexus serve</code>（HTTP 模式）在同一個 process 內切換多個 repo 時，
+        有機率留下未 CHECKPOINT 的 WAL 檔案，導致下次開啟時出現
+<code>UNREACHABLE_CODE in wal_record.cpp:76</code>。
+        此問題（Issue #1480）在 MCP 模式（<code>gitnexus mcp</code>）不存在。
+        生產環境建議以 MCP 模式為主，或每個 repo 起獨立的 HTTP 程序。
+</p> </div> </div> <h2>Kubernetes 部署</h2> <p>
+GitNexus 官方只提供一個 Kubernetes artifact：
+<strong>Sigstore ClusterImagePolicy</strong>（位於 <code>deploy/kubernetes/cluster-image-policy.yaml</code>）。
+    這個 admission policy 強制叢集只接受由官方 GitHub Actions 建構並用 Cosign 簽名的映像，
+    拒絕任何未簽名或非官方來源的映像進入 Pod。
+</p> <h3>映像簽名驗證（Cosign）</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>Cosign 映像驗證</span> <button class="cb-copy" data-code="# 驗證官方映像的 Cosign 簽名（供應鏈安全）
+
+# 1. 驗證簽名（確認映像確實由官方 GitHub Actions 建立）
+cosign verify ghcr.io/abhigyanpatwari/gitnexus:1.6.2 \
+  --certificate-identity-regexp '^https://github\.com/abhigyanpatwari/GitNexus/\.github/workflows/docker\.yml@refs/tags/v[0-9]+\.[0-9]+\.[0-9]+' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+
+# 2. 下載 SLSA 供應鏈來源驗證（溯源到具體 commit）
+cosign download attestation ghcr.io/abhigyanpatwari/gitnexus:1.6.2 \
+  --predicate-type https://slsa.dev/provenance/v1
+
+# 受保護的映像前綴：
+# ghcr.io/abhigyanpatwari/gitnexus*
+# docker.io/akonlabs/gitnexus*
+# akonlabs/gitnexus*" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 驗證官方映像的 Cosign 簽名（供應鏈安全）</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 1. 驗證簽名（確認映像確實由官方 GitHub Actions 建立）</span></span>
+<span class="line"><span style="color:#61AFEF">cosign</span><span style="color:#98C379"> verify</span><span style="color:#98C379"> ghcr.io/abhigyanpatwari/gitnexus:1.6.2</span><span style="color:#56B6C2"> \</span></span>
+<span class="line"><span style="color:#D19A66">  --certificate-identity-regexp</span><span style="color:#98C379"> '^https://github\.com/abhigyanpatwari/GitNexus/\.github/workflows/docker\.yml@refs/tags/v[0-9]+\.[0-9]+\.[0-9]+'</span><span style="color:#56B6C2"> \</span></span>
+<span class="line"><span style="color:#D19A66">  --certificate-oidc-issuer</span><span style="color:#98C379"> https://token.actions.githubusercontent.com</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 2. 下載 SLSA 供應鏈來源驗證（溯源到具體 commit）</span></span>
+<span class="line"><span style="color:#61AFEF">cosign</span><span style="color:#98C379"> download</span><span style="color:#98C379"> attestation</span><span style="color:#98C379"> ghcr.io/abhigyanpatwari/gitnexus:1.6.2</span><span style="color:#56B6C2"> \</span></span>
+<span class="line"><span style="color:#D19A66">  --predicate-type</span><span style="color:#98C379"> https://slsa.dev/provenance/v1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 受保護的映像前綴：</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ghcr.io/abhigyanpatwari/gitnexus*</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># docker.io/akonlabs/gitnexus*</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># akonlabs/gitnexus*</span></span></code></pre> </div> </div>   <h3>ClusterImagePolicy</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>deploy/kubernetes/cluster-image-policy.yaml</span> <button class="cb-copy" data-code="# deploy/kubernetes/cluster-image-policy.yaml
+# Sigstore Policy Controller — 強制只允許已簽名的官方映像進入 Pod
+
+apiVersion: policy.sigstore.dev/v1beta1
+kind: ClusterImagePolicy
+metadata:
+  name: gitnexus-signed-images
+spec:
+  images:
+  - glob: 'ghcr.io/abhigyanpatwari/gitnexus*'
+  - glob: 'docker.io/akonlabs/gitnexus*'
+  - glob: 'akonlabs/gitnexus*'
+  authorities:
+  - name: gitnexus-cosign-keyless
+    keyless:
+      url: https://fulcio.sigstore.dev
+    identities:
+    - issuer: https://token.actions.githubusercontent.com
+      subjectRegExp: >-
+        ^https://github\.com/abhigyanpatwari/GitNexus/\.github/workflows/docker\.yml@refs/tags/v[0-9]+\.[0-9]+\.[0-9]+
+    ctlog:
+      url: https://rekor.sigstore.dev" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="yaml"><code><span class="line"><span style="color:#7F848E;font-style:italic"># deploy/kubernetes/cluster-image-policy.yaml</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Sigstore Policy Controller — 強制只允許已簽名的官方映像進入 Pod</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E06C75">apiVersion</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">policy.sigstore.dev/v1beta1</span></span>
+<span class="line"><span style="color:#E06C75">kind</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">ClusterImagePolicy</span></span>
+<span class="line"><span style="color:#E06C75">metadata</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">  name</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">gitnexus-signed-images</span></span>
+<span class="line"><span style="color:#E06C75">spec</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">  images</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#ABB2BF">  - </span><span style="color:#E06C75">glob</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'ghcr.io/abhigyanpatwari/gitnexus*'</span></span>
+<span class="line"><span style="color:#ABB2BF">  - </span><span style="color:#E06C75">glob</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'docker.io/akonlabs/gitnexus*'</span></span>
+<span class="line"><span style="color:#ABB2BF">  - </span><span style="color:#E06C75">glob</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'akonlabs/gitnexus*'</span></span>
+<span class="line"><span style="color:#E06C75">  authorities</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#ABB2BF">  - </span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">gitnexus-cosign-keyless</span></span>
+<span class="line"><span style="color:#E06C75">    keyless</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">      url</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">https://fulcio.sigstore.dev</span></span>
+<span class="line"><span style="color:#E06C75">    identities</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#ABB2BF">    - </span><span style="color:#E06C75">issuer</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">https://token.actions.githubusercontent.com</span></span>
+<span class="line"><span style="color:#E06C75">      subjectRegExp</span><span style="color:#ABB2BF">: </span><span style="color:#C678DD">>-</span></span>
+<span class="line"><span style="color:#98C379">        ^https://github\.com/abhigyanpatwari/GitNexus/\.github/workflows/docker\.yml@refs/tags/v[0-9]+\.[0-9]+\.[0-9]+</span></span>
+<span class="line"><span style="color:#E06C75">    ctlog</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#E06C75">      url</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">https://rekor.sigstore.dev</span></span></code></pre> </div> </div>   <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>Kubernetes 部署流程</span> <button class="cb-copy" data-code="# Kubernetes 部署流程（官方只提供 admission policy，需自行補 manifests）
+
+# 1. 安裝 Sigstore policy-controller（一次性）
+helm repo add sigstore https://sigstore.github.io/helm-charts &amp;&amp; helm repo update
+helm install policy-controller -n cosign-system --create-namespace \
+  sigstore/policy-controller
+
+# 2. 替目標 namespace 貼上標籤（啟用 admission webhook）
+kubectl label namespace <your-ns> policy.sigstore.dev/include=true
+
+# 3. 套用映像政策
+kubectl apply -f deploy/kubernetes/cluster-image-policy.yaml
+
+# 4. 測試：部署未簽名映像會被拒絕
+# Error: admission webhook &quot;policy.sigstore.dev&quot; denied the request:
+#   image &quot;ghcr.io/abhigyanpatwari/gitnexus:edge&quot; failed policy" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># Kubernetes 部署流程（官方只提供 admission policy，需自行補 manifests）</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 1. 安裝 Sigstore policy-controller（一次性）</span></span>
+<span class="line"><span style="color:#61AFEF">helm</span><span style="color:#98C379"> repo</span><span style="color:#98C379"> add</span><span style="color:#98C379"> sigstore</span><span style="color:#98C379"> https://sigstore.github.io/helm-charts</span><span style="color:#ABB2BF"> &#x26;&#x26; </span><span style="color:#61AFEF">helm</span><span style="color:#98C379"> repo</span><span style="color:#98C379"> update</span></span>
+<span class="line"><span style="color:#61AFEF">helm</span><span style="color:#98C379"> install</span><span style="color:#98C379"> policy-controller</span><span style="color:#D19A66"> -n</span><span style="color:#98C379"> cosign-system</span><span style="color:#D19A66"> --create-namespace</span><span style="color:#56B6C2"> \</span></span>
+<span class="line"><span style="color:#98C379">  sigstore/policy-controller</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 2. 替目標 namespace 貼上標籤（啟用 admission webhook）</span></span>
+<span class="line"><span style="color:#61AFEF">kubectl</span><span style="color:#98C379"> label</span><span style="color:#98C379"> namespace</span><span style="color:#ABB2BF"> &#x3C;</span><span style="color:#98C379">your-n</span><span style="color:#ABB2BF">s> </span><span style="color:#98C379">policy.sigstore.dev/include=</span><span style="color:#D19A66">true</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 3. 套用映像政策</span></span>
+<span class="line"><span style="color:#61AFEF">kubectl</span><span style="color:#98C379"> apply</span><span style="color:#D19A66"> -f</span><span style="color:#98C379"> deploy/kubernetes/cluster-image-policy.yaml</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 4. 測試：部署未簽名映像會被拒絕</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Error: admission webhook "policy.sigstore.dev" denied the request:</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">#   image "ghcr.io/abhigyanpatwari/gitnexus:edge" failed policy</span></span></code></pre> </div> </div>   <div class="call info"> <span class="ci">ℹ️</span> <div> <strong>官方不提供 Helm Chart</strong> <p>
+GitNexus 目前沒有官方的 Kubernetes Deployment、Service 或 PVC manifests，
+        也沒有 Helm Chart。若需要完整的 K8s 部署，需自行撰寫 manifests，
+        以 GHCR 官方映像為基礎，參照 docker-compose 的 Volume 結構：
+<code>/data/gitnexus</code>（索引持久化）和 <code>/workspace</code>（原始碼掛載）。
+</p> </div> </div> <h2>效能調校：環境變數</h2> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>環境變數調校參考</span> <button class="cb-copy" data-code="# 效能調校環境變數（適用於 Docker / Kubernetes 部署）
+
+# 解析並行度
+GITNEXUS_WORKER_POOL_SIZE=8          # 預設：CPU 核心數 - 1，最多 16
+GITNEXUS_PARSE_CHUNK_CONCURRENCY=4   # 預設：2，提高可加速大型 repo 索引
+
+# 檔案大小限制
+GITNEXUS_MAX_FILE_SIZE=1048576       # 預設：524288 (512KB)，大型生成檔可能需要調高
+
+# LadybugDB WAL 設定
+GITNEXUS_WAL_CHECKPOINT_THRESHOLD=134217728  # 預設：64MiB，調高可減少 I/O
+
+# Worker 超時
+GITNEXUS_WORKER_SUB_BATCH_TIMEOUT_MS=60000   # 預設：30000ms
+GITNEXUS_WORKER_MAX_RESPAWNS_PER_SLOT=5      # 預設：3
+
+# 其他
+GITNEXUS_SKIP_OPTIONAL_GRAMMARS=1    # 跳過 Dart/Proto/Swift/Kotlin grammar 建構（加速安裝）
+GITNEXUS_NO_GITIGNORE=1              # 跳過 .gitignore 解析（特殊用途）
+GITNEXUS_VERBOSE=1                   # 詳細日誌" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 效能調校環境變數（適用於 Docker / Kubernetes 部署）</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 解析並行度</span></span>
+<span class="line"><span style="color:#E06C75">GITNEXUS_WORKER_POOL_SIZE</span><span style="color:#56B6C2">=</span><span style="color:#98C379">8</span><span style="color:#7F848E;font-style:italic">          # 預設：CPU 核心數 - 1，最多 16</span></span>
+<span class="line"><span style="color:#E06C75">GITNEXUS_PARSE_CHUNK_CONCURRENCY</span><span style="color:#56B6C2">=</span><span style="color:#98C379">4</span><span style="color:#7F848E;font-style:italic">   # 預設：2，提高可加速大型 repo 索引</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 檔案大小限制</span></span>
+<span class="line"><span style="color:#E06C75">GITNEXUS_MAX_FILE_SIZE</span><span style="color:#56B6C2">=</span><span style="color:#98C379">1048576</span><span style="color:#7F848E;font-style:italic">       # 預設：524288 (512KB)，大型生成檔可能需要調高</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># LadybugDB WAL 設定</span></span>
+<span class="line"><span style="color:#E06C75">GITNEXUS_WAL_CHECKPOINT_THRESHOLD</span><span style="color:#56B6C2">=</span><span style="color:#98C379">134217728</span><span style="color:#7F848E;font-style:italic">  # 預設：64MiB，調高可減少 I/O</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Worker 超時</span></span>
+<span class="line"><span style="color:#E06C75">GITNEXUS_WORKER_SUB_BATCH_TIMEOUT_MS</span><span style="color:#56B6C2">=</span><span style="color:#98C379">60000</span><span style="color:#7F848E;font-style:italic">   # 預設：30000ms</span></span>
+<span class="line"><span style="color:#E06C75">GITNEXUS_WORKER_MAX_RESPAWNS_PER_SLOT</span><span style="color:#56B6C2">=</span><span style="color:#98C379">5</span><span style="color:#7F848E;font-style:italic">      # 預設：3</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 其他</span></span>
+<span class="line"><span style="color:#E06C75">GITNEXUS_SKIP_OPTIONAL_GRAMMARS</span><span style="color:#56B6C2">=</span><span style="color:#98C379">1</span><span style="color:#7F848E;font-style:italic">    # 跳過 Dart/Proto/Swift/Kotlin grammar 建構（加速安裝）</span></span>
+<span class="line"><span style="color:#E06C75">GITNEXUS_NO_GITIGNORE</span><span style="color:#56B6C2">=</span><span style="color:#98C379">1</span><span style="color:#7F848E;font-style:italic">              # 跳過 .gitignore 解析（特殊用途）</span></span>
+<span class="line"><span style="color:#E06C75">GITNEXUS_VERBOSE</span><span style="color:#56B6C2">=</span><span style="color:#98C379">1</span><span style="color:#7F848E;font-style:italic">                   # 詳細日誌</span></span></code></pre> </div> </div>   <h3>.gitnexusrc — Repo 層級設定</h3> <p>
+在 repo 根目錄放 <code>.gitnexusrc</code> 可以為每個 repo 設定不同的索引行為，
+    不影響其他 repo：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>.gitnexusrc</span> <button class="cb-copy" data-code="// .gitnexusrc — 放在 repo 根目錄，設定此 repo 的索引行為
+{
+  &quot;defaultBranch&quot;: &quot;main&quot;,
+  &quot;skipContextFiles&quot;: true,     // 跳過 context window 用的輔助文件
+  &quot;skipSkills&quot;: true,           // 跳過 MCP Skills 產生
+  &quot;embeddings&quot;: true,           // 啟用語義向量（需要更多記憶體）
+  &quot;workerTimeout&quot;: 60           // 秒，單一 worker job 逾時
+}
+
+// 或用巢狀格式（不同指令不同設定）
+{
+  &quot;analyze&quot;: {
+    &quot;defaultBranch&quot;: &quot;develop&quot;,
+    &quot;skipSkills&quot;: true
+  }
+}" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="json"><code><span class="line"><span style="color:#7F848E;font-style:italic">// .gitnexusrc — 放在 repo 根目錄，設定此 repo 的索引行為</span></span>
+<span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "defaultBranch"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"main"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  "skipContextFiles"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span><span style="color:#ABB2BF">,     </span><span style="color:#7F848E;font-style:italic">// 跳過 context window 用的輔助文件</span></span>
+<span class="line"><span style="color:#E06C75">  "skipSkills"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span><span style="color:#ABB2BF">,           </span><span style="color:#7F848E;font-style:italic">// 跳過 MCP Skills 產生</span></span>
+<span class="line"><span style="color:#E06C75">  "embeddings"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span><span style="color:#ABB2BF">,           </span><span style="color:#7F848E;font-style:italic">// 啟用語義向量（需要更多記憶體）</span></span>
+<span class="line"><span style="color:#E06C75">  "workerTimeout"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">60</span><span style="color:#7F848E;font-style:italic">           // 秒，單一 worker job 逾時</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 或用巢狀格式（不同指令不同設定）</span></span>
+<span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "analyze"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "defaultBranch"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"develop"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">    "skipSkills"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre> </div> </div>   <h2>授權：PolyForm Noncommercial</h2> <p>
+GitNexus 採用 <strong>PolyForm Noncommercial License 1.0.0</strong>。
+    這個授權看起來「開源」，但對商業用途有明確限制，企業部署前必須確認：
+</p> <table> <thead> <tr> <th>情境</th> <th>是否允許</th> </tr> </thead> <tbody> <tr> <td>個人研究、實驗、Side Project</td> <td>✅ 允許</td> </tr> <tr> <td>學術研究機構</td> <td>✅ 允許</td> </tr> <tr> <td>非營利組織、政府機關</td> <td>✅ 允許</td> </tr> <tr> <td>營利公司的內部開發工具用途</td> <td>❌ 需要商業授權</td> </tr> <tr> <td>把 GitNexus 整合到商業產品中</td> <td>❌ 需要商業授權</td> </tr> </tbody> </table> <div class="call warn"> <span class="ci">⚠️</span> <div> <strong>「內部使用」不等於「非商業」</strong> <p>
+PolyForm Noncommercial 的關鍵在於使用者是否為營利實體，而非是否對外販售。
+        即使是「只在公司內部給工程師用」，只要公司是營利組織，就需要取得商業授權。
+        違規者在收到書面通知後有 32 天補辦期，逾期授權自動終止。
+</p> </div> </div> <p>
+商業授權請聯繫 Akonlabs：<strong>founders@akonlabs.com</strong>，
+    或至 GitNexus 官方 Discord 洽詢。目前商業方案分為託管 SaaS 與自托管企業版兩種，
+    定價按需報價（無公開價目表）。
+</p> <h2>本章小結</h2> <table> <thead> <tr> <th>需求</th> <th>方案</th> </tr> </thead> <tbody> <tr> <td>多個 repo 各自查詢</td> <td><code>gitnexus analyze</code> 各 repo → <code>gitnexus mcp</code> → 工具加 <code>repo</code> 參數</td> </tr> <tr> <td>微服務跨服務契約分析</td> <td><code>gitnexus group create/add/sync</code> → <code>@group-name</code> 查詢</td> </tr> <tr> <td>最簡單的 Docker 部署</td> <td>官方 <code>docker-compose.yaml</code>，<code>WORKSPACE_DIR</code> 指向程式碼目錄</td> </tr> <tr> <td>單容器整合部署</td> <td><code>mekayelanik/gitnexus-mcp</code> all-in-one 映像</td> </tr> <tr> <td>Kubernetes 映像安全</td> <td>部署 Sigstore ClusterImagePolicy，強制 Cosign 簽名驗證</td> </tr> <tr> <td>商業企業部署</td> <td>聯繫 Akonlabs 取得商業授權（PolyForm Noncommercial 不含營利用途）</td> </tr> </tbody> </table>  </div> <nav class="cnav" data-astro-cid-mw7aashj> <a href="/gitnexus/ch13-real-world" class="prev" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>← 上一章</span> <span class="nt" data-astro-cid-mw7aashj>實戰場景：PR Review、Bug 定位、安全重構</span> </a> <a href="/gitnexus/ch15-cypher-wiki" class="next" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>下一章 →</span> <span class="nt" data-astro-cid-mw7aashj>Cypher 圖查詢與 Wiki 自動生成</span> </a> </nav> </main> </div> <script>
+    // Theme
+    const html = document.documentElement;
+    const tt = document.getElementById('tt');
+    const isun = document.getElementById('isun');
+    const imoon = document.getElementById('imoon');
+    function syncIcons() {
+      const dk = html.classList.contains('dark');
+      isun.style.display = dk ? 'block' : 'none';
+      imoon.style.display = dk ? 'none' : 'block';
+    }
+    syncIcons();
+    tt?.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('cc-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      syncIcons();
+    });
+
+    // Progress
+    const pb = document.getElementById('pb');
+    window.addEventListener('scroll', () => {
+      const t = document.documentElement.scrollHeight - window.innerHeight;
+      pb.style.width = t > 0 ? `${(window.scrollY / t) * 100}%` : '0%';
+    }, { passive: true });
+
+    // Sidebar part toggles
+    document.querySelectorAll('.pt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.pid;
+        const list = document.querySelector(`[data-pl="${id}"]`);
+        btn.classList.toggle('open');
+        list?.classList.toggle('closed');
+      });
+    });
+
+    // Mobile menu
+    const sb = document.getElementById('sb');
+    const ov = document.getElementById('ov');
+    const mb = document.getElementById('mbtn');
+    const open = () => { sb.classList.add('open'); ov.classList.add('open'); document.body.style.overflow='hidden'; };
+    const close = () => { sb.classList.remove('open'); ov.classList.remove('open'); document.body.style.overflow=''; };
+    mb?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+  </script> </body> 

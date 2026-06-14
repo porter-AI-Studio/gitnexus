@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="zh-TW" data-astro-cid-mw7aashj> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>知識圖譜 vs Vector RAG vs Graph RAG | </title><link rel="stylesheet" href="/gitnexus/_astro/DocsLayout.BldRaKia.css">
+<style>.cb-wrap[data-astro-cid-jgrc2lfe]{margin-bottom:1.25rem}.cb-bar[data-astro-cid-jgrc2lfe]{display:flex;align-items:center;justify-content:space-between;background:#1a1a2e;border-radius:6px 6px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.05);padding:.18rem .5rem .18rem .75rem;min-height:1.8rem}.cb-label[data-astro-cid-jgrc2lfe]{color:#a6adc8;font-family:Fira Code,Cascadia Code,Consolas,monospace;font-size:.73rem;letter-spacing:.04em}.cb-inner[data-astro-cid-jgrc2lfe] pre{border-radius:0 0 8px 8px!important;margin-bottom:0!important}.cb-copy[data-astro-cid-jgrc2lfe]{background:#ffffff14;color:#888;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:.15rem .55rem;font-size:.7rem;cursor:pointer;transition:all .15s;flex-shrink:0}.cb-copy[data-astro-cid-jgrc2lfe]:hover{background:#ffffff2e;color:#fff}.cb-copy[data-astro-cid-jgrc2lfe].copied{color:#4ec9b0;border-color:#4ec9b0}
+</style></head>GitNexus 完整指南 <meta name="description" content="比較三種讓 AI 理解程式碼的技術路線：傳統 Vector RAG 的語義相似度檢索、Graph RAG 的運行時探索，以及 GitNexus 的預計算關係智慧（Pre-computed Relational Intelligence）。理解為什麼預先建好的圖譜能做到一次查詢返回完整上下文。"> <link rel="icon" href="/gitnexus/favicon.svg" type="image/svg+xml"> <script>
+    (function () {
+      const s = localStorage.getItem('cc-theme');
+      const d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+    })();
+  </script>  </html> <body data-astro-cid-mw7aashj> <div id="pb" data-astro-cid-mw7aashj></div> <header data-astro-cid-mw7aashj> <div class="hi" data-astro-cid-mw7aashj> <div class="hl" data-astro-cid-mw7aashj> <button id="mbtn" class="ibtn" aria-label="選單" data-astro-cid-mw7aashj> <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" data-astro-cid-mw7aashj></path> </svg> </button> <a href="/gitnexus/" class="site-name" data-astro-cid-mw7aashj> <span class="logo" data-astro-cid-mw7aashj>GN</span>&nbsp;&nbsp;GitNexus 完整指南
+</a> </div> <div class="hr" data-astro-cid-mw7aashj> <button id="tt" class="ibtn" aria-label="切換主題" data-astro-cid-mw7aashj> <svg id="isun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" data-astro-cid-mw7aashj></path> </svg> <svg id="imoon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" data-astro-cid-mw7aashj></path> </svg> </button> </div> </div> </header> <div id="layout" data-astro-cid-mw7aashj> <nav id="sb" data-astro-cid-mw7aashj> <div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="1" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 1：認識 GitNexus</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="1" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch01-what-is-gitnexus" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>1.</span> <span data-astro-cid-mw7aashj>GitNexus 是什麼？零伺服器程式碼智慧引擎</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch02-why-knowledge-graph" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>2.</span> <span data-astro-cid-mw7aashj>AI Coding 的結構盲點：為什麼需要知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch03-graph-vs-rag" class="active" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>3.</span> <span data-astro-cid-mw7aashj>知識圖譜 vs Vector RAG vs Graph RAG</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="2" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 2：安裝與快速上手</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="2" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch04-install" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>4.</span> <span data-astro-cid-mw7aashj>安裝與環境設定</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch05-first-index" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>5.</span> <span data-astro-cid-mw7aashj>索引你的第一個程式碼庫</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch06-web-ui" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>6.</span> <span data-astro-cid-mw7aashj>Web UI 視覺化探索</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="3" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 3：核心架構原理</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="3" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch07-indexing-pipeline" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>7.</span> <span data-astro-cid-mw7aashj>索引管線：從 Tree-sitter AST 到知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch08-ladybugdb-search" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>8.</span> <span data-astro-cid-mw7aashj>LadybugDB 與混合搜尋（BM25 + Semantic + RRF）</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch09-clustering-processes" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>9.</span> <span data-astro-cid-mw7aashj>Leiden 社群偵測與執行流程追蹤</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="4" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 4：MCP 整合與 Agent 實戰</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="4" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch10-mcp-setup" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>10.</span> <span data-astro-cid-mw7aashj>MCP 整合：連接 Claude Code 與各大編輯器</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch11-mcp-tools" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>11.</span> <span data-astro-cid-mw7aashj>16 個 MCP 工具詳解</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch12-skills-hooks" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>12.</span> <span data-astro-cid-mw7aashj>Agent Skills 與 Hooks 自動化工作流</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch13-real-world" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>13.</span> <span data-astro-cid-mw7aashj>實戰場景：PR Review、Bug 定位、安全重構</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="5" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 5：進階應用與生態</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="5" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch14-multi-repo-docker" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>14.</span> <span data-astro-cid-mw7aashj>多倉庫架構與 Docker 部署</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch15-cypher-wiki" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>15.</span> <span data-astro-cid-mw7aashj>Cypher 圖查詢與 Wiki 自動生成</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch16-tool-comparison" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>16.</span> <span data-astro-cid-mw7aashj>競品橫向比較與工具選型</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="6" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 6：附錄</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="6" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/about" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>17.</span> <span data-astro-cid-mw7aashj>關於作者</span>  </a> </li> </ul> </div> </nav> <div id="ov" data-astro-cid-mw7aashj></div> <main data-astro-cid-mw7aashj> <div class="cb" data-astro-cid-mw7aashj>  <span class="clabel">第 3 章 · Part 1：認識 GitNexus</span> <h1>知識圖譜 vs Vector RAG vs Graph RAG</h1> <p class="cdesc">預計算結構 vs 運行時探索：三種技術路線的本質差異，以及為什麼一次查詢就能返回完整上下文</p> <h2>問題的本質：程式碼理解 ≠ 文字相似度</h2> <p>讓 AI 理解程式碼，本質上是在解一道「context window 與 retrieval」的拉扯問題：context window 永遠塞不下整份 repo，retrieval 又要在對的時間拿到對的那塊。</p> <p>過去主流做法分兩條路：</p> <ul> <li><strong>語義搜尋派（Vector RAG）</strong>：把程式碼切成 chunk，用 embedding 模型轉向量，查詢時算 cosine similarity 找最相關片段</li> <li><strong>讓 AI 自己探索派（grep + read）</strong>：Claude Code、Cursor 等工具主動 grep 關鍵字、讀檔案、決定看哪裡</li> </ul> <p>這兩條路都有同一個致命傷：<strong>回傳的是程式碼片段，不是程式碼關係</strong>。它們能告訴你「程式碼在哪裡」，但找不到「程式碼之間怎麼連」。</p> <h2>三條技術路線的對比</h2> <table> <thead> <tr> <th>技術路線</th> <th>核心機制</th> <th>能做到</th> <th>做不到</th> <th>對 AI 的代價</th> </tr> </thead> <tbody> <tr> <td><strong>Vector RAG</strong></td> <td>Embedding 向量 + cosine similarity</td> <td>用自然語言找語義相似的程式碼片段</td> <td>跨檔案呼叫鏈；詞彙不重疊的隱性依賴；同名符號的命名空間區分</td> <td>回傳片段仍需 AI 自行讀檔拼湊關係</td> </tr> <tr> <td><strong>Graph RAG</strong>（運行時）</td> <td>查詢時讓 LLM 走圖探索（hop by hop）</td> <td>比向量更精準的結構查詢，能走多跳</td> <td>依賴 LLM「恰好探索到」關鍵路徑，多跳推理容易漏；每次對話重算</td> <td>多次查詢鏈，長上下文中答案漂移</td> </tr> <tr> <td><strong>預計算關係智慧</strong>（GitNexus）</td> <td>索引時完成聚類/呼叫鏈/影響範圍計算，查詢時走圖 traversal</td> <td>單次工具呼叫返回完整呼叫鏈、依賴、影響範圍；結果確定性高</td> <td>描述性/風格類問題（vector 更適合）；動態語言的部分呼叫推斷有誤差</td> <td>一次工具呼叫，零 LLM Token 消耗</td> </tr> </tbody> </table> <p>GitNexus 官方對此有一句精準的描述：</p> <blockquote> <p><em>"Traditional approaches give the LLM raw graph edges and hope it explores enough. GitNexus precomputes structure at index time."</em></p> <p>傳統做法把原始圖邊給 LLM，祈禱它自己探索夠多。GitNexus 在索引時就把結構算好。</p> </blockquote> <h2>Vector RAG 的典型失敗模式</h2> <p>向量搜尋在程式碼場景有三個系統性的弱點：</p> <ol> <li><strong>詞彙不重疊的呼叫關係</strong>：<code>payment/checkout.ts</code> 裡的 <code>processOrder()</code> 透過三層中間呼叫最終呼叫了 <code>auth/login.ts</code> 的 <code>validateSession()</code>，但因為兩個檔案幾乎沒有共同關鍵字，向量搜尋永遠找不到這條連線</li> <li><strong>同名符號的命名空間混淆</strong>：不同模組都有 <code>create()</code>、<code>update()</code> 這種通用名稱，向量搜尋會把所有無關的同名函式一起拉回來</li> <li><strong>Chunk 邊界切斷關係</strong>：一個函式的定義跨越了 chunk 邊界，呼叫關係被截斷，LLM 只看到殘缺的片段</li> </ol> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>向量 RAG 的典型失敗場景</span> <button class="cb-copy" data-code="# 向量 RAG 的典型失敗場景
+
+問題：「UserService.login 被哪些模組呼叫？」
+
+向量搜尋找到的（詞彙相似片段）：
+  → auth/login.ts      ← 函式定義本身
+  → tests/auth.test.ts ← 測試檔（詞彙相似）
+  → docs/auth.md       ← 文件（語義相似）
+
+向量搜尋「漏掉」的（無詞彙重疊）：
+  → api/middleware.ts  → verifyRequest() → login()
+  → payment/hooks.ts   → onCheckout() → login()
+  → admin/session.ts   → refreshAdmin() → login()
+
+# 這 3 個真正的呼叫者都找不到，因為它們
+# 不含「UserService」或「login」關鍵字" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># 向量 RAG 的典型失敗場景</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>問題：「UserService.login 被哪些模組呼叫？」</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>向量搜尋找到的（詞彙相似片段）：</span></span>
+<span class="line"><span>  → auth/login.ts      ← 函式定義本身</span></span>
+<span class="line"><span>  → tests/auth.test.ts ← 測試檔（詞彙相似）</span></span>
+<span class="line"><span>  → docs/auth.md       ← 文件（語義相似）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>向量搜尋「漏掉」的（無詞彙重疊）：</span></span>
+<span class="line"><span>  → api/middleware.ts  → verifyRequest() → login()</span></span>
+<span class="line"><span>  → payment/hooks.ts   → onCheckout() → login()</span></span>
+<span class="line"><span>  → admin/session.ts   → refreshAdmin() → login()</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># 這 3 個真正的呼叫者都找不到，因為它們</span></span>
+<span class="line"><span># 不含「UserService」或「login」關鍵字</span></span></code></pre> </div> </div>  <script type="module">document.querySelectorAll(".cb-copy").forEach(e=>{e.addEventListener("click",()=>{const t=e.dataset.code;t&&navigator.clipboard.writeText(t).then(()=>{e.textContent="已複製!",e.classList.add("copied"),setTimeout(()=>{e.textContent="複製",e.classList.remove("copied")},2e3)})})});</script> <h2>圖查詢如何解決這個問題</h2> <p>GitNexus 在索引階段就用 Tree-sitter 解析每個函式的呼叫關係，把它們存成圖的邊（Edge）。查詢時走 graph traversal——不管呼叫者和被呼叫者的詞彙有多不同，只要圖裡有邊，就能找到。</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>圖查詢：一次呼叫拿到完整上下游</span> <button class="cb-copy" data-code="# 圖查詢的做法（GitNexus impact 工具）
+# 預先計算好呼叫圖，查詢走 graph traversal
+
+impact(&quot;UserService.login&quot;) →
+
+  d=1 直接呼叫（必須同步修改）：3 個
+    api/middleware.ts::verifyRequest
+    payment/hooks.ts::onCheckout
+    admin/session.ts::refreshAdmin
+
+  d=2 間接依賴（建議測試）：7 個
+    含 payment/checkout.ts::processOrder ← 注意！
+
+  d=3 傳遞依賴：2 條執行流程
+
+# 一次呼叫，0 Token 消耗，完整結果" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># 圖查詢的做法（GitNexus impact 工具）</span></span>
+<span class="line"><span># 預先計算好呼叫圖，查詢走 graph traversal</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>impact("UserService.login") →</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  d=1 直接呼叫（必須同步修改）：3 個</span></span>
+<span class="line"><span>    api/middleware.ts::verifyRequest</span></span>
+<span class="line"><span>    payment/hooks.ts::onCheckout</span></span>
+<span class="line"><span>    admin/session.ts::refreshAdmin</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  d=2 間接依賴（建議測試）：7 個</span></span>
+<span class="line"><span>    含 payment/checkout.ts::processOrder ← 注意！</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  d=3 傳遞依賴：2 條執行流程</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># 一次呼叫，0 Token 消耗，完整結果</span></span></code></pre> </div> </div>   <h2>GitNexus 的 Node/Edge 圖模型</h2> <p>知識圖譜的基礎是清楚定義節點（Node）與邊（Edge）的類型。GitNexus 的圖模型：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>Node/Edge 模型</span> <button class="cb-copy" data-code="# GitNexus 的 Node/Edge 圖模型
+
+節點類型（Node Types）：
+  Function  — 函式、方法
+  Class     — 類別
+  Module    — 模組、檔案
+  Variable  — 模組層級變數
+  Type      — 型別、介面（TypeScript/Go/Rust）
+
+邊類型（Edge Types）：
+  CALLS       → A 呼叫 B
+  IMPORTS     → A 匯入 B
+  EXTENDS     → A 繼承 B
+  IMPLEMENTS  → A 實作介面 B
+  REFERENCES  → A 參考型別 B
+  CONTAINS    → 模組包含符號" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># GitNexus 的 Node/Edge 圖模型</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>節點類型（Node Types）：</span></span>
+<span class="line"><span>  Function  — 函式、方法</span></span>
+<span class="line"><span>  Class     — 類別</span></span>
+<span class="line"><span>  Module    — 模組、檔案</span></span>
+<span class="line"><span>  Variable  — 模組層級變數</span></span>
+<span class="line"><span>  Type      — 型別、介面（TypeScript/Go/Rust）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>邊類型（Edge Types）：</span></span>
+<span class="line"><span>  CALLS       → A 呼叫 B</span></span>
+<span class="line"><span>  IMPORTS     → A 匯入 B</span></span>
+<span class="line"><span>  EXTENDS     → A 繼承 B</span></span>
+<span class="line"><span>  IMPLEMENTS  → A 實作介面 B</span></span>
+<span class="line"><span>  REFERENCES  → A 參考型別 B</span></span>
+<span class="line"><span>  CONTAINS    → 模組包含符號</span></span></code></pre> </div> </div>   <div style="border:1px solid var(--border);border-radius:12px;padding:1.5rem 1.25rem;background:var(--bg2);margin:1.5rem 0;overflow-x:auto"> <p style="text-align:center;font-size:.78rem;color:var(--muted);margin:0 0 1.1rem;font-weight:600;letter-spacing:.06em">從原始碼到圖查詢（GitNexus 預計算流程）</p> <div style="display:flex;align-items:flex-start;gap:0;min-width:700px;font-family:var(--mono);font-size:.75rem"> <div style="text-align:center;min-width:90px"> <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:.5rem .4rem"> <div style="font-weight:700">原始碼</div> <div style="color:var(--muted);font-size:.68rem;margin-top:.15rem">.ts .py .go ...</div> </div> </div> <div style="display:flex;align-items:center;height:42px;flex:1;min-width:12px"><div style="height:2px;background:var(--border);width:100%"></div></div> <div style="text-align:center;min-width:100px"> <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:.5rem .4rem"> <div style="font-weight:700">Tree-sitter</div> <div style="color:var(--muted);font-size:.68rem;margin-top:.15rem">AST 解析</div> </div> </div> <div style="display:flex;align-items:center;height:42px;flex:1;min-width:12px"><div style="height:2px;background:var(--border);width:100%"></div></div> <div style="text-align:center;min-width:100px"> <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:.5rem .4rem"> <div style="font-weight:700">索引管線</div> <div style="color:var(--muted);font-size:.68rem;margin-top:.15rem">跨檔案解析</div> </div> </div> <div style="display:flex;align-items:center;height:42px;flex:1;min-width:12px"><div style="height:2px;background:var(--border);width:100%"></div></div> <div style="text-align:center;min-width:100px"> <div style="background:var(--accent);border-radius:7px;padding:.5rem .4rem;color:#fff"> <div style="font-weight:700">LadybugDB</div> <div style="font-size:.68rem;opacity:.85;margin-top:.15rem">圖 + 向量儲存</div> </div> </div> <div style="display:flex;align-items:center;height:42px;flex:1;min-width:12px"><div style="height:2px;background:var(--border);width:100%"></div></div> <div style="text-align:center;min-width:100px"> <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:.5rem .4rem"> <div style="font-weight:700">MCP Tools</div> <div style="color:var(--muted);font-size:.68rem;margin-top:.15rem">impact/context/query</div> </div> </div> <div style="display:flex;align-items:center;height:42px;flex:1;min-width:12px"><div style="height:2px;background:var(--border);width:100%"></div></div> <div style="text-align:center;min-width:80px"> <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:.5rem .4rem"> <div style="font-weight:700">AI Agent</div> <div style="color:var(--muted);font-size:.68rem;margin-top:.15rem">Claude/Cursor</div> </div> </div> </div> <div style="text-align:center;margin-top:.85rem;font-size:.73rem;color:var(--muted);font-family:var(--mono)">
+所有結構計算在「索引時」完成，查詢時 AI Agent 直接拿預先算好的結果
+</div> </div> <h2>混合搜尋：圖結構 + 語義向量</h2> <p>GitNexus 並不是純圖查詢，它用 <strong>BM25 + Semantic Embeddings + RRF（Reciprocal Rank Fusion）</strong> 三路融合：</p> <ul> <li><strong>BM25</strong>：傳統關鍵字排名，命中精準但對語義差異敏感</li> <li><strong>Semantic Embedding</strong>（HuggingFace transformers.js）：語義向量相似度，補 BM25 的語義缺口</li> <li><strong>RRF</strong>：用倒序排名加權合併兩路結果，比任一單路都準</li> </ul> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>三路混合搜尋範例</span> <button class="cb-copy" data-code="# BM25 + Semantic + RRF 混合搜尋
+
+使用者問：「JWT 在哪裡生成？」
+
+BM25（關鍵字排名）找到：
+  → auth/jwt.ts::sign()        score: 0.92
+  → auth/jwt.ts::verify()      score: 0.88
+  → config/auth.ts::JWT_SECRET score: 0.71
+
+Semantic（語義向量）找到：
+  → auth/token.ts::createToken()   score: 0.87  ← 沒有 &quot;JWT&quot; 字面
+  → auth/session.ts::issueSession() score: 0.74  ← 語義相關
+  → auth/jwt.ts::sign()             score: 0.91
+
+RRF 融合後最終排名：
+  1. auth/jwt.ts::sign()         (兩路都高分)
+  2. auth/token.ts::createToken() (語義命中補了 BM25 的缺口)
+  3. auth/jwt.ts::verify()" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># BM25 + Semantic + RRF 混合搜尋</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>使用者問：「JWT 在哪裡生成？」</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>BM25（關鍵字排名）找到：</span></span>
+<span class="line"><span>  → auth/jwt.ts::sign()        score: 0.92</span></span>
+<span class="line"><span>  → auth/jwt.ts::verify()      score: 0.88</span></span>
+<span class="line"><span>  → config/auth.ts::JWT_SECRET score: 0.71</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Semantic（語義向量）找到：</span></span>
+<span class="line"><span>  → auth/token.ts::createToken()   score: 0.87  ← 沒有 "JWT" 字面</span></span>
+<span class="line"><span>  → auth/session.ts::issueSession() score: 0.74  ← 語義相關</span></span>
+<span class="line"><span>  → auth/jwt.ts::sign()             score: 0.91</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>RRF 融合後最終排名：</span></span>
+<span class="line"><span>  1. auth/jwt.ts::sign()         (兩路都高分)</span></span>
+<span class="line"><span>  2. auth/token.ts::createToken() (語義命中補了 BM25 的缺口)</span></span>
+<span class="line"><span>  3. auth/jwt.ts::verify()</span></span></code></pre> </div> </div>   <div class="call tip"> <span class="ci">💡</span> <div> <strong>什麼時候 Vector RAG 反而更好？</strong> <p>GitNexus 本身也整合了向量搜尋——對於<strong>描述性問題</strong>（「這個 repo 的整體風格是什麼？」「這段程式碼在做什麼業務邏輯？」）向量搜尋反而比圖查詢直觀。GitNexus 的混合策略就是讓兩者各司其職：圖查詢負責結構關係，向量搜尋負責語義理解。</p> </div> </div> <h2>預計算的代價與邊界</h2> <p>預計算帶來精準度，但也有它的邊界條件：</p> <table> <thead> <tr> <th>限制</th> <th>說明</th> <th>GitNexus 的處理方式</th> </tr> </thead> <tbody> <tr> <td>動態語言的呼叫推斷</td> <td>Python、Ruby 的動態 dispatch 無法 100% 靜態解析</td> <td>置信度（confidence）評分標記不確定的邊，<code>impact</code> 工具回傳時標示</td> </tr> <tr> <td>索引需要時間</td> <td>大型 monorepo 首次索引需要數分鐘</td> <td>增量索引（只更新變更檔案）、<code>detect_changes</code> 追蹤 Git diff</td> </tr> <tr> <td>程式碼變更後需要重新索引</td> <td>改了程式碼，圖譜可能過期（stale）</td> <td>PostToolUse Hooks 在 git commit 後自動提示重新索引</td> </tr> <tr> <td>某些架構模式的識別精度</td> <td>複雜的工廠模式、反射、macro 生成的呼叫</td> <td>持續改進解析器；Scope-Resolution Pipeline（RFC #909）提升準確度</td> </tr> </tbody> </table> <div class="call info"> <span class="ci">ℹ️</span> <div> <strong>小結：選哪條路？</strong> <p>如果你的 AI Coding 需求主要是<strong>局部生成</strong>（寫一個函式、解釋一段程式碼），Vector RAG 或讓 AI 自己 grep 就夠用。但如果你需要<strong>跨檔案重構、影響範圍分析、依賴追蹤、PR 審查</strong>這些結構性任務，GitNexus 的預計算知識圖譜才能提供可靠的上下文。不是取代關係，而是適合不同任務層次。</p> </div> </div>  </div> <nav class="cnav" data-astro-cid-mw7aashj> <a href="/gitnexus/ch02-why-knowledge-graph" class="prev" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>← 上一章</span> <span class="nt" data-astro-cid-mw7aashj>AI Coding 的結構盲點：為什麼需要知識圖譜</span> </a> <a href="/gitnexus/ch04-install" class="next" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>下一章 →</span> <span class="nt" data-astro-cid-mw7aashj>安裝與環境設定</span> </a> </nav> </main> </div> <script>
+    // Theme
+    const html = document.documentElement;
+    const tt = document.getElementById('tt');
+    const isun = document.getElementById('isun');
+    const imoon = document.getElementById('imoon');
+    function syncIcons() {
+      const dk = html.classList.contains('dark');
+      isun.style.display = dk ? 'block' : 'none';
+      imoon.style.display = dk ? 'none' : 'block';
+    }
+    syncIcons();
+    tt?.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('cc-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      syncIcons();
+    });
+
+    // Progress
+    const pb = document.getElementById('pb');
+    window.addEventListener('scroll', () => {
+      const t = document.documentElement.scrollHeight - window.innerHeight;
+      pb.style.width = t > 0 ? `${(window.scrollY / t) * 100}%` : '0%';
+    }, { passive: true });
+
+    // Sidebar part toggles
+    document.querySelectorAll('.pt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.pid;
+        const list = document.querySelector(`[data-pl="${id}"]`);
+        btn.classList.toggle('open');
+        list?.classList.toggle('closed');
+      });
+    });
+
+    // Mobile menu
+    const sb = document.getElementById('sb');
+    const ov = document.getElementById('ov');
+    const mb = document.getElementById('mbtn');
+    const open = () => { sb.classList.add('open'); ov.classList.add('open'); document.body.style.overflow='hidden'; };
+    const close = () => { sb.classList.remove('open'); ov.classList.remove('open'); document.body.style.overflow=''; };
+    mb?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+  </script> </body> 

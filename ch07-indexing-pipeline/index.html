@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-TW" data-astro-cid-mw7aashj> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>索引管線深度解析 | </title><link rel="stylesheet" href="/gitnexus/_astro/DocsLayout.BldRaKia.css">
+<style>.cb-wrap[data-astro-cid-jgrc2lfe]{margin-bottom:1.25rem}.cb-bar[data-astro-cid-jgrc2lfe]{display:flex;align-items:center;justify-content:space-between;background:#1a1a2e;border-radius:6px 6px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.05);padding:.18rem .5rem .18rem .75rem;min-height:1.8rem}.cb-label[data-astro-cid-jgrc2lfe]{color:#a6adc8;font-family:Fira Code,Cascadia Code,Consolas,monospace;font-size:.73rem;letter-spacing:.04em}.cb-inner[data-astro-cid-jgrc2lfe] pre{border-radius:0 0 8px 8px!important;margin-bottom:0!important}.cb-copy[data-astro-cid-jgrc2lfe]{background:#ffffff14;color:#888;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:.15rem .55rem;font-size:.7rem;cursor:pointer;transition:all .15s;flex-shrink:0}.cb-copy[data-astro-cid-jgrc2lfe]:hover{background:#ffffff2e;color:#fff}.cb-copy[data-astro-cid-jgrc2lfe].copied{color:#4ec9b0;border-color:#4ec9b0}
+</style></head>GitNexus 完整指南 <meta name="description" content="深入 GitNexus 的 12 階段索引管線：從 scan 到 processes，Tree-sitter AST 解析、Legacy DAG 與 Scope-Resolution 兩套呼叫解析路徑、crossFile 跨檔案依賴解析、mro 繼承鏈解析、Leiden 社群偵測，以及執行流程追蹤的完整技術架構。"> <link rel="icon" href="/gitnexus/favicon.svg" type="image/svg+xml"> <script>
+    (function () {
+      const s = localStorage.getItem('cc-theme');
+      const d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+    })();
+  </script>  </html> <body data-astro-cid-mw7aashj> <div id="pb" data-astro-cid-mw7aashj></div> <header data-astro-cid-mw7aashj> <div class="hi" data-astro-cid-mw7aashj> <div class="hl" data-astro-cid-mw7aashj> <button id="mbtn" class="ibtn" aria-label="選單" data-astro-cid-mw7aashj> <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" data-astro-cid-mw7aashj></path> </svg> </button> <a href="/gitnexus/" class="site-name" data-astro-cid-mw7aashj> <span class="logo" data-astro-cid-mw7aashj>GN</span>&nbsp;&nbsp;GitNexus 完整指南
+</a> </div> <div class="hr" data-astro-cid-mw7aashj> <button id="tt" class="ibtn" aria-label="切換主題" data-astro-cid-mw7aashj> <svg id="isun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" data-astro-cid-mw7aashj></path> </svg> <svg id="imoon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" data-astro-cid-mw7aashj></path> </svg> </button> </div> </div> </header> <div id="layout" data-astro-cid-mw7aashj> <nav id="sb" data-astro-cid-mw7aashj> <div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="1" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 1：認識 GitNexus</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="1" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch01-what-is-gitnexus" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>1.</span> <span data-astro-cid-mw7aashj>GitNexus 是什麼？零伺服器程式碼智慧引擎</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch02-why-knowledge-graph" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>2.</span> <span data-astro-cid-mw7aashj>AI Coding 的結構盲點：為什麼需要知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch03-graph-vs-rag" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>3.</span> <span data-astro-cid-mw7aashj>知識圖譜 vs Vector RAG vs Graph RAG</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="2" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 2：安裝與快速上手</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="2" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch04-install" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>4.</span> <span data-astro-cid-mw7aashj>安裝與環境設定</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch05-first-index" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>5.</span> <span data-astro-cid-mw7aashj>索引你的第一個程式碼庫</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch06-web-ui" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>6.</span> <span data-astro-cid-mw7aashj>Web UI 視覺化探索</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="3" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 3：核心架構原理</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="3" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch07-indexing-pipeline" class="active" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>7.</span> <span data-astro-cid-mw7aashj>索引管線：從 Tree-sitter AST 到知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch08-ladybugdb-search" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>8.</span> <span data-astro-cid-mw7aashj>LadybugDB 與混合搜尋（BM25 + Semantic + RRF）</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch09-clustering-processes" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>9.</span> <span data-astro-cid-mw7aashj>Leiden 社群偵測與執行流程追蹤</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="4" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 4：MCP 整合與 Agent 實戰</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="4" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch10-mcp-setup" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>10.</span> <span data-astro-cid-mw7aashj>MCP 整合：連接 Claude Code 與各大編輯器</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch11-mcp-tools" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>11.</span> <span data-astro-cid-mw7aashj>16 個 MCP 工具詳解</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch12-skills-hooks" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>12.</span> <span data-astro-cid-mw7aashj>Agent Skills 與 Hooks 自動化工作流</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch13-real-world" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>13.</span> <span data-astro-cid-mw7aashj>實戰場景：PR Review、Bug 定位、安全重構</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="5" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 5：進階應用與生態</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="5" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch14-multi-repo-docker" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>14.</span> <span data-astro-cid-mw7aashj>多倉庫架構與 Docker 部署</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch15-cypher-wiki" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>15.</span> <span data-astro-cid-mw7aashj>Cypher 圖查詢與 Wiki 自動生成</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch16-tool-comparison" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>16.</span> <span data-astro-cid-mw7aashj>競品橫向比較與工具選型</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="6" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 6：附錄</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="6" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/about" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>17.</span> <span data-astro-cid-mw7aashj>關於作者</span>  </a> </li> </ul> </div> </nav> <div id="ov" data-astro-cid-mw7aashj></div> <main data-astro-cid-mw7aashj> <div class="cb" data-astro-cid-mw7aashj>  <span class="clabel">第 7 章 · Part 3：核心架構原理</span> <h1>索引管線深度解析</h1> <p class="cdesc">12 個階段，從原始碼到知識圖譜的完整旅程</p> <h2>全局流程圖</h2> <p>一行 <code>gitnexus analyze</code> 背後，是 12 個階段的管線串聯執行：</p> <svg viewBox="0 0 800 200" width="100%" height="auto" style="background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 0.5rem; margin: 1.5rem 0;"> <defs> <marker id="arrow-blue" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"> <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6"></path> </marker> <marker id="arrow-orange" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"> <path d="M 0 0 L 10 5 L 0 10 z" fill="#e06b4a"></path> </marker> <marker id="arrow-accent" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"> <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"></path> </marker> <marker id="arrow-muted" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"> <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)"></path> </marker> </defs> <!-- 背景管道連線 --> <line x1="45" y1="72" x2="752" y2="72" stroke="var(--border)" stroke-width="2"></line> <!-- 1. Source --> <rect x="10" y="50" width="70" height="45" rx="6" fill="var(--bg)" stroke="var(--muted)" stroke-width="2"></rect> <text x="45" y="77" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="11">Source</text> <text x="45" y="120" text-anchor="middle" fill="var(--muted)" font-size="10">原始碼檔案</text> <!-- Arrow 1 -> 2 --> <line x1="80" y1="72" x2="95" y2="72" stroke="var(--muted)" stroke-width="2" marker-end="url(#arrow-blue)"></line> <!-- 2. scan --> <rect x="95" y="50" width="65" height="45" rx="6" fill="var(--bg)" stroke="#3b82f6" stroke-width="2"></rect> <text x="127" y="77" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="11">scan</text> <text x="127" y="120" text-anchor="middle" fill="var(--muted)" font-size="10">檔案清單</text> <text x="127" y="136" text-anchor="middle" fill="#3b82f6" font-size="9" font-family="var(--mono)">Stage 1</text> <!-- Arrow 2 -> 3 --> <line x1="160" y1="72" x2="175" y2="72" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow-blue)"></line> <!-- 3. structure --> <rect x="175" y="50" width="75" height="45" rx="6" fill="var(--bg)" stroke="#3b82f6" stroke-width="2"></rect> <text x="212" y="77" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="11">structure</text> <text x="212" y="120" text-anchor="middle" fill="var(--muted)" font-size="10">模組結構</text> <text x="212" y="136" text-anchor="middle" fill="#3b82f6" font-size="9" font-family="var(--mono)">Stage 2</text> <!-- Arrow 3 -> 4 --> <line x1="250" y1="72" x2="265" y2="72" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow-blue)"></line> <!-- 4. parse --> <rect x="265" y="50" width="70" height="45" rx="6" fill="rgba(59,130,246,0.07)" stroke="#3b82f6" stroke-width="2"></rect> <text x="300" y="77" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="11">parse</text> <text x="300" y="120" text-anchor="middle" fill="var(--muted)" font-size="10">AST 符號</text> <text x="300" y="136" text-anchor="middle" fill="#3b82f6" font-size="9" font-family="var(--mono)">Stage 3</text> <!-- Arrow 4 -> 5 --> <line x1="335" y1="72" x2="350" y2="72" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow-blue)"></line> <!-- 5. crossFile --> <rect x="350" y="50" width="85" height="45" rx="6" fill="var(--bg)" stroke="#3b82f6" stroke-width="2"></rect> <text x="392" y="77" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="11">crossFile</text> <text x="392" y="120" text-anchor="middle" fill="var(--muted)" font-size="10">跨檔依賴</text> <text x="392" y="136" text-anchor="middle" fill="#3b82f6" font-size="9" font-family="var(--mono)">Stage 4</text> <!-- Arrow 5 -> 6 --> <line x1="435" y1="72" x2="450" y2="72" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow-orange)"></line> <!-- 6. mro --> <rect x="450" y="50" width="55" height="45" rx="6" fill="var(--bg)" stroke="#e06b4a" stroke-width="2"></rect> <text x="477" y="77" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="11">mro</text> <text x="477" y="120" text-anchor="middle" fill="var(--muted)" font-size="10">繼承鏈</text> <text x="477" y="136" text-anchor="middle" fill="#e06b4a" font-size="9" font-family="var(--mono)">Stage 5</text> <!-- Arrow 6 -> 7 --> <line x1="505" y1="72" x2="520" y2="72" stroke="#e06b4a" stroke-width="2" marker-end="url(#arrow-orange)"></line> <!-- 7. communities --> <rect x="520" y="50" width="90" height="45" rx="6" fill="var(--bg)" stroke="#e06b4a" stroke-width="2"></rect> <text x="565" y="77" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="11">communities</text> <text x="565" y="120" text-anchor="middle" fill="var(--muted)" font-size="10">Leiden 聚類</text> <text x="565" y="136" text-anchor="middle" fill="#e06b4a" font-size="9" font-family="var(--mono)">Stage 6</text> <!-- Arrow 7 -> 8 --> <line x1="610" y1="72" x2="625" y2="72" stroke="#e06b4a" stroke-width="2" marker-end="url(#arrow-orange)"></line> <!-- 8. processes --> <rect x="625" y="50" width="75" height="45" rx="6" fill="var(--bg)" stroke="#e06b4a" stroke-width="2"></rect> <text x="662" y="77" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="11">processes</text> <text x="662" y="120" text-anchor="middle" fill="var(--muted)" font-size="10">執行流程</text> <text x="662" y="136" text-anchor="middle" fill="#e06b4a" font-size="9" font-family="var(--mono)">Stage 7</text> <!-- Arrow 8 -> 9 --> <line x1="700" y1="72" x2="715" y2="72" stroke="#e06b4a" stroke-width="2" marker-end="url(#arrow-accent)"></line> <!-- 9. LadybugDB --> <rect x="715" y="50" width="75" height="45" rx="6" fill="var(--abg)" stroke="var(--accent)" stroke-width="2"></rect> <text x="752" y="77" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="10" font-family="var(--mono)">LadybugDB</text> <text x="752" y="120" text-anchor="middle" fill="var(--accent)" font-size="10" font-weight="bold">持久化寫入</text> </svg> <h2>完整的 12 階段結構</h2> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>12 階段索引管線</span> <button class="cb-copy" data-code="# 12 階段索引管線（完整序列）
+scan
+  └─ structure
+       ├─ [markdown]          # Markdown 文件解析（文件節點）
+       ├─ [cobol]             # COBOL 特殊語法處理
+       └─ parse
+              ├─ [routes]     # 路由偵測（Express/FastAPI/Next.js 等）
+              ├─ [tools]      # 工具/函式工具定義偵測
+              ├─ [orm]        # ORM 模型關係偵測（Prisma/SQLAlchemy 等）
+              └─ crossFile
+                      └─ mro
+                           └─ communities
+                                   └─ processes" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># 12 階段索引管線（完整序列）</span></span>
+<span class="line"><span>scan</span></span>
+<span class="line"><span>  └─ structure</span></span>
+<span class="line"><span>       ├─ [markdown]          # Markdown 文件解析（文件節點）</span></span>
+<span class="line"><span>       ├─ [cobol]             # COBOL 特殊語法處理</span></span>
+<span class="line"><span>       └─ parse</span></span>
+<span class="line"><span>              ├─ [routes]     # 路由偵測（Express/FastAPI/Next.js 等）</span></span>
+<span class="line"><span>              ├─ [tools]      # 工具/函式工具定義偵測</span></span>
+<span class="line"><span>              ├─ [orm]        # ORM 模型關係偵測（Prisma/SQLAlchemy 等）</span></span>
+<span class="line"><span>              └─ crossFile</span></span>
+<span class="line"><span>                      └─ mro</span></span>
+<span class="line"><span>                           └─ communities</span></span>
+<span class="line"><span>                                   └─ processes</span></span></code></pre> </div> </div>  <script type="module">document.querySelectorAll(".cb-copy").forEach(e=>{e.addEventListener("click",()=>{const t=e.dataset.code;t&&navigator.clipboard.writeText(t).then(()=>{e.textContent="已複製!",e.classList.add("copied"),setTimeout(()=>{e.textContent="複製",e.classList.remove("copied")},2e3)})})});</script> <h2>各階段詳解</h2> <h3>Stage 1：scan — 建立檔案清單</h3> <p>遍歷整個 repo 目錄樹，建立要索引的檔案清單。根據語言副檔名分類（<code>.ts</code>、<code>.py</code>、<code>.java</code> 等），跳過 <code>.gitignore</code>、<code>node_modules</code>、二進制檔案、超大型檔案。同時讀取 <code>.gitnexus/registry.json</code> 的上次索引記錄，確定哪些檔案是新增或修改過的（增量索引的基礎）。</p> <h3>Stage 2：structure — 模組與包結構</h3> <p>建立高層模組結構：識別 <code>package.json</code>、<code>pyproject.toml</code>、<code>go.mod</code> 等專案描述檔，解析命名空間、包層次、模組邊界。這個階段建立的是「容器節點」（模組、包），後續的符號解析會把函式、類別等掛在對應容器下。</p> <p>特殊語言在 structure 後插入：<strong>Markdown</strong>（建立文件節點，關聯到程式碼符號）、<strong>COBOL</strong>（特殊行格式前置處理）。</p> <h3>Stage 3：parse — Tree-sitter AST 解析（核心）</h3> <p>這是最重要的階段，所有程式碼符號都在這裡被提取。GitNexus 使用 Tree-sitter 對每個檔案建立精確的 AST（抽象語法樹），從中提取：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>Tree-sitter 解析輸出的三類核心資訊</span> <button class="cb-copy" data-code="// Tree-sitter 解析的三類核心資訊
+
+// 1. Symbols（符號）— 節點
+{
+  type: &quot;function&quot; | &quot;class&quot; | &quot;method&quot; | &quot;variable&quot; | &quot;interface&quot; | &quot;module&quot;,
+  name: &quot;validatePayment&quot;,
+  file: &quot;src/payments/validator.ts&quot;,
+  startLine: 42,
+  endLine: 67,
+  signature: &quot;(amount: number, currency: string) => Promise<ValidationResult>&quot;
+}
+
+// 2. Edges（關係）— 邊
+{
+  type: &quot;calls&quot; | &quot;imports&quot; | &quot;extends&quot; | &quot;implements&quot; | &quot;references&quot;,
+  from: &quot;checkout → validatePayment&quot;,
+  to: &quot;validatePayment → formatCurrency&quot;
+}
+
+// 3. Clusters（集群）— Leiden 社群偵測
+{
+  id: &quot;cluster_auth&quot;,
+  members: [&quot;login&quot;, &quot;validateToken&quot;, &quot;refreshSession&quot;, &quot;logout&quot;],
+  cohesion: 0.87  // 集群內聚度評分
+}" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="javascript"><code><span class="line"><span style="color:#7F848E;font-style:italic">// Tree-sitter 解析的三類核心資訊</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 1. Symbols（符號）— 節點</span></span>
+<span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  type</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"function"</span><span style="color:#56B6C2"> |</span><span style="color:#98C379"> "class"</span><span style="color:#56B6C2"> |</span><span style="color:#98C379"> "method"</span><span style="color:#56B6C2"> |</span><span style="color:#98C379"> "variable"</span><span style="color:#56B6C2"> |</span><span style="color:#98C379"> "interface"</span><span style="color:#56B6C2"> |</span><span style="color:#98C379"> "module"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  name</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"validatePayment"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  file</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"src/payments/validator.ts"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  startLine</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">42</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  endLine</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">67</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  signature</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"(amount: number, currency: string) => Promise&#x3C;ValidationResult>"</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 2. Edges（關係）— 邊</span></span>
+<span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  type</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"calls"</span><span style="color:#56B6C2"> |</span><span style="color:#98C379"> "imports"</span><span style="color:#56B6C2"> |</span><span style="color:#98C379"> "extends"</span><span style="color:#56B6C2"> |</span><span style="color:#98C379"> "implements"</span><span style="color:#56B6C2"> |</span><span style="color:#98C379"> "references"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  from</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"checkout → validatePayment"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  to</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"validatePayment → formatCurrency"</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 3. Clusters（集群）— Leiden 社群偵測</span></span>
+<span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  id</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"cluster_auth"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  members</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"login"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"validateToken"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"refreshSession"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"logout"</span><span style="color:#ABB2BF">],</span></span>
+<span class="line"><span style="color:#E06C75">  cohesion</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">0.87</span><span style="color:#7F848E;font-style:italic">  // 集群內聚度評分</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre> </div> </div>   <p>parse 後插入三個專業解析器：</p> <ul> <li><strong>[routes]</strong>：偵測 Express、FastAPI、Next.js App Router 等框架的路由定義，建立 HTTP route → handler function 的映射關係</li> <li><strong>[tools]</strong>：偵測 LLM Tool / Function Definition 格式（OpenAI tools、Claude tool_use、Anthropic SDK），讓 AI agent 知道哪些函式是工具</li> <li><strong>[orm]</strong>：偵測 Prisma schema、SQLAlchemy models、TypeORM entities，建立 ORM 模型 → 資料庫表格的關係節點</li> </ul> <h3>Stage 4：crossFile — 跨檔案依賴解析</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>crossFile 階段：解析跨檔案依賴與 mro</span> <button class="cb-copy" data-code="# crossFile 階段：解析跨檔案依賴
+
+# 輸入：各檔案內的未解析符號引用
+# 輸出：填充圖譜中的 imports / references 邊
+
+# 示例：payment.ts 引用了 validator.ts 的 validatePayment
+import { validatePayment } from './validator';
+# crossFile 階段：
+# 1. 解析 './validator' 相對路徑 → 絕對路徑 src/payments/validator.ts
+# 2. 在圖中建立邊：payment.ts → validatePayment（imports）
+# 3. 解析 alias（tsconfig paths / webpack aliases）
+
+# mro（Method Resolution Order）階段
+# 解決繼承鏈：找到 BasePayment.process() → StripePayment.process() → 實際呼叫目標
+# Python: C3 linearization MRO
+# TypeScript: interface merging + class hierarchy
+# Java: 依照 JLS 繼承規則" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># crossFile 階段：解析跨檔案依賴</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># 輸入：各檔案內的未解析符號引用</span></span>
+<span class="line"><span># 輸出：填充圖譜中的 imports / references 邊</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># 示例：payment.ts 引用了 validator.ts 的 validatePayment</span></span>
+<span class="line"><span>import { validatePayment } from './validator';</span></span>
+<span class="line"><span># crossFile 階段：</span></span>
+<span class="line"><span># 1. 解析 './validator' 相對路徑 → 絕對路徑 src/payments/validator.ts</span></span>
+<span class="line"><span># 2. 在圖中建立邊：payment.ts → validatePayment（imports）</span></span>
+<span class="line"><span># 3. 解析 alias（tsconfig paths / webpack aliases）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># mro（Method Resolution Order）階段</span></span>
+<span class="line"><span># 解決繼承鏈：找到 BasePayment.process() → StripePayment.process() → 實際呼叫目標</span></span>
+<span class="line"><span># Python: C3 linearization MRO</span></span>
+<span class="line"><span># TypeScript: interface merging + class hierarchy</span></span>
+<span class="line"><span># Java: 依照 JLS 繼承規則</span></span></code></pre> </div> </div>   <p>crossFile 解析 import/require/use 等語句，將同一 repo 內的相對路徑引用解析成絕對路徑，建立檔案間的 <code>imports</code> 邊。同時處理：tsconfig paths alias、webpack module alias、Python PYTHONPATH。</p> <h3>Stage 5：mro — 繼承鏈與多型解析</h3> <p>Method Resolution Order 階段解決繼承帶來的呼叫模糊性：</p> <ul> <li><strong>Python</strong>：依照 C3 MRO 算法（PEP 3141）建立類別繼承鏈</li> <li><strong>TypeScript</strong>：解析 interface 合併、class extends、implements 鏈</li> <li><strong>C#</strong>：解析 virtual/override 方法分派，interface 多型</li> <li><strong>Java</strong>：依照 JLS 規範處理方法覆寫</li> </ul> <p>完成後，<code>context</code> 工具才能正確回答「這個 abstract method 的實際執行者是哪個子類」。</p> <h3>Stage 6：communities — Leiden 社群偵測</h3> <p>用 Leiden 演算法（Louvain 的改進版）對完整呼叫圖做社群偵測，自動把功能相關的符號歸入同一 Cluster。Leiden 的關鍵特性：</p> <ul> <li>保證找到分離的社群（Louvain 可能產生連通不好的社群）</li> <li>結果確定性高（相同圖輸入多次執行結果一致）</li> <li>複雜度 O(n log n)，適合大型 codebase</li> </ul> <p>產出：每個 Cluster 有名稱（自動推斷或從主要函式名導出）、成員列表、內聚度評分。</p> <h3>Stage 7：processes — 執行流程追蹤</h3> <p>從已知入口點（API route handlers、<code>main()</code>、event handlers、scheduled jobs）向下追蹤完整呼叫鏈，建立「執行流程」——一條從入口到所有可達節點的有向子圖。</p> <p>完成後，<code>detect_changes</code> 工具可以把「改了第 N 行」映射到「影響哪些執行流程」，而不只是「哪些函式直接呼叫」。</p> <h2>兩套呼叫解析路徑</h2> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>Legacy DAG vs Scope-Resolution Pipeline</span> <button class="cb-copy" data-code="# 兩套呼叫解析路徑
+
+# Legacy Call-Resolution DAG（未遷移語言）
+# 6 階段類型化管道（Go、Rust、PHP、Ruby、Java、Swift、C/C++、Dart 等）
+# 流程：符號提取 → 作用域分析 → 型別推論 → 呼叫解析 → DAG 建立 → 邊寫入
+
+# Scope-Resolution Pipeline（RFC #909 Ring 3，已遷移語言）
+# Python、C#、TypeScript 採用新架構
+# 流程：Registry 驅動，注册中心優先解析，支援動態分派與型別縮窄
+# 優勢：精準解析 Python 的 duck typing、C# 的介面多型、TypeScript 的 union types" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># 兩套呼叫解析路徑</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># Legacy Call-Resolution DAG（未遷移語言）</span></span>
+<span class="line"><span># 6 階段類型化管道（Go、Rust、PHP、Ruby、Java、Swift、C/C++、Dart 等）</span></span>
+<span class="line"><span># 流程：符號提取 → 作用域分析 → 型別推論 → 呼叫解析 → DAG 建立 → 邊寫入</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># Scope-Resolution Pipeline（RFC #909 Ring 3，已遷移語言）</span></span>
+<span class="line"><span># Python、C#、TypeScript 採用新架構</span></span>
+<span class="line"><span># 流程：Registry 驅動，注册中心優先解析，支援動態分派與型別縮窄</span></span>
+<span class="line"><span># 優勢：精準解析 Python 的 duck typing、C# 的介面多型、TypeScript 的 union types</span></span></code></pre> </div> </div>   <table> <thead> <tr> <th>路徑</th> <th>適用語言</th> <th>特點</th> </tr> </thead> <tbody> <tr> <td><strong>Legacy Call-Resolution DAG</strong></td> <td>Go、Rust、PHP、Ruby、Java、Swift、C/C++、Dart 等</td> <td>6 階段類型化管道，穩定成熟</td> </tr> <tr> <td><strong>Scope-Resolution Pipeline</strong>（RFC #909）</td> <td>Python、C#、TypeScript</td> <td>Registry 驅動，支援動態分派、型別縮窄、union types</td> </tr> </tbody> </table> <div class="call info"> <span class="ci">ℹ️</span> <div> <strong>為什麼要兩套解析路徑？</strong> <p>Python 的 duck typing、TypeScript 的 union/intersection types、C# 的 interface 多型，在靜態呼叫解析上比 Go 或 Java 困難得多——不能只靠靜態型別推論。RFC #909 Scope-Resolution Pipeline 引入了 Registry 驅動的解析，能在不執行程式碼的前提下，更精準地解析這三種語言的動態行為。</p> </div> </div> <h2>技術棧：CLI vs Web 對比</h2> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>完整技術棧對比</span> <button class="cb-copy" data-code="組件           CLI 模式（本地）           Web 模式（瀏覽器）
+─────────────   ─────────────────────────   ──────────────────────
+程式碼解析      Tree-sitter native binding  Tree-sitter WASM
+資料儲存        LadybugDB native（磁碟）    LadybugDB WASM（記憶體）
+搜尋融合        BM25 + Semantic + RRF       同左
+Agent 接口      MCP（stdio 協議）           —
+視覺化          —                           Sigma.js + Graphology（WebGL）
+前端框架        —                           React 18 + TypeScript + Vite + Tailwind v4" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span>組件           CLI 模式（本地）           Web 模式（瀏覽器）</span></span>
+<span class="line"><span>─────────────   ─────────────────────────   ──────────────────────</span></span>
+<span class="line"><span>程式碼解析      Tree-sitter native binding  Tree-sitter WASM</span></span>
+<span class="line"><span>資料儲存        LadybugDB native（磁碟）    LadybugDB WASM（記憶體）</span></span>
+<span class="line"><span>搜尋融合        BM25 + Semantic + RRF       同左</span></span>
+<span class="line"><span>Agent 接口      MCP（stdio 協議）           —</span></span>
+<span class="line"><span>視覺化          —                           Sigma.js + Graphology（WebGL）</span></span>
+<span class="line"><span>前端框架        —                           React 18 + TypeScript + Vite + Tailwind v4</span></span></code></pre> </div> </div>   <h2>增量索引的實現原理</h2> <p>GitNexus 用檔案 hash + git 變更集的雙重策略決定哪些檔案需要重新解析：</p> <ul> <li>首次索引：對所有檔案走完 12 個階段</li> <li>後續索引：只對 hash 變更的檔案重新解析，然後更新圖中的相關邊</li> <li>crossFile、mro 階段的結果會基於變更的符號集做局部更新，不需要全量重算</li> <li>communities（Leiden）和 processes 階段目前仍是全量重算（因為全局圖結構可能改變）</li> </ul> <div class="call tip"> <span class="ci">💡</span> <div> <strong>大型 Repo 的索引時間</strong> <p>根據社群報告，典型中大型 repo（10萬行以上）首次索引約 1-3 分鐘（不含 <code>--embeddings</code>）。加上 <code>--embeddings</code> 會增加語義向量計算時間，視 CPU 性能大約再多 2-5 分鐘。後續增量更新因為只重新解析變更檔案，通常在 10 秒內完成。</p> </div> </div> <h2>小結：為什麼預計算勝過 Runtime RAG</h2> <p>12 階段管線的最終產物是一個完整、精確、有向的知識圖譜，已經把以下所有工作做完：</p> <ul> <li>符號提取（所有函式、類別、方法）</li> <li>跨檔案依賴（完整 import 圖）</li> <li>繼承鏈解析（正確的多型目標）</li> <li>功能集群（Leiden 社群）</li> <li>執行流程（從入口點的完整呼叫鏈）</li> </ul> <p>當 AI agent 呼叫 <code>impact("validatePayment")</code> 時，GitNexus 只需在圖上做一次 BFS 遍歷，毫秒級返回結果——不需要 LLM 去 grep、推論、再 grep。這就是「預計算優於 runtime 探索」的本質。</p>  </div> <nav class="cnav" data-astro-cid-mw7aashj> <a href="/gitnexus/ch06-web-ui" class="prev" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>← 上一章</span> <span class="nt" data-astro-cid-mw7aashj>Web UI 視覺化探索</span> </a> <a href="/gitnexus/ch08-ladybugdb-search" class="next" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>下一章 →</span> <span class="nt" data-astro-cid-mw7aashj>LadybugDB 與混合搜尋</span> </a> </nav> </main> </div> <script>
+    // Theme
+    const html = document.documentElement;
+    const tt = document.getElementById('tt');
+    const isun = document.getElementById('isun');
+    const imoon = document.getElementById('imoon');
+    function syncIcons() {
+      const dk = html.classList.contains('dark');
+      isun.style.display = dk ? 'block' : 'none';
+      imoon.style.display = dk ? 'none' : 'block';
+    }
+    syncIcons();
+    tt?.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('cc-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      syncIcons();
+    });
+
+    // Progress
+    const pb = document.getElementById('pb');
+    window.addEventListener('scroll', () => {
+      const t = document.documentElement.scrollHeight - window.innerHeight;
+      pb.style.width = t > 0 ? `${(window.scrollY / t) * 100}%` : '0%';
+    }, { passive: true });
+
+    // Sidebar part toggles
+    document.querySelectorAll('.pt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.pid;
+        const list = document.querySelector(`[data-pl="${id}"]`);
+        btn.classList.toggle('open');
+        list?.classList.toggle('closed');
+      });
+    });
+
+    // Mobile menu
+    const sb = document.getElementById('sb');
+    const ov = document.getElementById('ov');
+    const mb = document.getElementById('mbtn');
+    const open = () => { sb.classList.add('open'); ov.classList.add('open'); document.body.style.overflow='hidden'; };
+    const close = () => { sb.classList.remove('open'); ov.classList.remove('open'); document.body.style.overflow=''; };
+    mb?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+  </script> </body> 

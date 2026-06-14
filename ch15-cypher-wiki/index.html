@@ -1,0 +1,561 @@
+<!DOCTYPE html><html lang="zh-TW" data-astro-cid-mw7aashj> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Cypher 圖查詢與 Wiki 自動生成 | </title><link rel="stylesheet" href="/gitnexus/_astro/DocsLayout.BldRaKia.css">
+<style>.cb-wrap[data-astro-cid-jgrc2lfe]{margin-bottom:1.25rem}.cb-bar[data-astro-cid-jgrc2lfe]{display:flex;align-items:center;justify-content:space-between;background:#1a1a2e;border-radius:6px 6px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.05);padding:.18rem .5rem .18rem .75rem;min-height:1.8rem}.cb-label[data-astro-cid-jgrc2lfe]{color:#a6adc8;font-family:Fira Code,Cascadia Code,Consolas,monospace;font-size:.73rem;letter-spacing:.04em}.cb-inner[data-astro-cid-jgrc2lfe] pre{border-radius:0 0 8px 8px!important;margin-bottom:0!important}.cb-copy[data-astro-cid-jgrc2lfe]{background:#ffffff14;color:#888;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:.15rem .55rem;font-size:.7rem;cursor:pointer;transition:all .15s;flex-shrink:0}.cb-copy[data-astro-cid-jgrc2lfe]:hover{background:#ffffff2e;color:#fff}.cb-copy[data-astro-cid-jgrc2lfe].copied{color:#4ec9b0;border-color:#4ec9b0}
+</style></head>GitNexus 完整指南 <meta name="description" content="進階玩家的兩把利器：直接用 Cypher 查詢語言探索知識圖譜的原始介面，撰寫自訂查詢挖掘程式碼關係；以及 gitnexus wiki 指令用 LLM 驅動自動生成架構文件，讓專案文件隨程式碼演進保持最新。"> <link rel="icon" href="/gitnexus/favicon.svg" type="image/svg+xml"> <script>
+    (function () {
+      const s = localStorage.getItem('cc-theme');
+      const d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+    })();
+  </script>  </html> <body data-astro-cid-mw7aashj> <div id="pb" data-astro-cid-mw7aashj></div> <header data-astro-cid-mw7aashj> <div class="hi" data-astro-cid-mw7aashj> <div class="hl" data-astro-cid-mw7aashj> <button id="mbtn" class="ibtn" aria-label="選單" data-astro-cid-mw7aashj> <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" data-astro-cid-mw7aashj></path> </svg> </button> <a href="/gitnexus/" class="site-name" data-astro-cid-mw7aashj> <span class="logo" data-astro-cid-mw7aashj>GN</span>&nbsp;&nbsp;GitNexus 完整指南
+</a> </div> <div class="hr" data-astro-cid-mw7aashj> <button id="tt" class="ibtn" aria-label="切換主題" data-astro-cid-mw7aashj> <svg id="isun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" data-astro-cid-mw7aashj></path> </svg> <svg id="imoon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" data-astro-cid-mw7aashj></path> </svg> </button> </div> </div> </header> <div id="layout" data-astro-cid-mw7aashj> <nav id="sb" data-astro-cid-mw7aashj> <div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="1" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 1：認識 GitNexus</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="1" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch01-what-is-gitnexus" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>1.</span> <span data-astro-cid-mw7aashj>GitNexus 是什麼？零伺服器程式碼智慧引擎</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch02-why-knowledge-graph" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>2.</span> <span data-astro-cid-mw7aashj>AI Coding 的結構盲點：為什麼需要知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch03-graph-vs-rag" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>3.</span> <span data-astro-cid-mw7aashj>知識圖譜 vs Vector RAG vs Graph RAG</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="2" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 2：安裝與快速上手</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="2" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch04-install" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>4.</span> <span data-astro-cid-mw7aashj>安裝與環境設定</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch05-first-index" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>5.</span> <span data-astro-cid-mw7aashj>索引你的第一個程式碼庫</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch06-web-ui" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>6.</span> <span data-astro-cid-mw7aashj>Web UI 視覺化探索</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="3" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 3：核心架構原理</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="3" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch07-indexing-pipeline" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>7.</span> <span data-astro-cid-mw7aashj>索引管線：從 Tree-sitter AST 到知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch08-ladybugdb-search" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>8.</span> <span data-astro-cid-mw7aashj>LadybugDB 與混合搜尋（BM25 + Semantic + RRF）</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch09-clustering-processes" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>9.</span> <span data-astro-cid-mw7aashj>Leiden 社群偵測與執行流程追蹤</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="4" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 4：MCP 整合與 Agent 實戰</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="4" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch10-mcp-setup" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>10.</span> <span data-astro-cid-mw7aashj>MCP 整合：連接 Claude Code 與各大編輯器</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch11-mcp-tools" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>11.</span> <span data-astro-cid-mw7aashj>16 個 MCP 工具詳解</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch12-skills-hooks" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>12.</span> <span data-astro-cid-mw7aashj>Agent Skills 與 Hooks 自動化工作流</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch13-real-world" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>13.</span> <span data-astro-cid-mw7aashj>實戰場景：PR Review、Bug 定位、安全重構</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="5" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 5：進階應用與生態</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="5" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch14-multi-repo-docker" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>14.</span> <span data-astro-cid-mw7aashj>多倉庫架構與 Docker 部署</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch15-cypher-wiki" class="active" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>15.</span> <span data-astro-cid-mw7aashj>Cypher 圖查詢與 Wiki 自動生成</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch16-tool-comparison" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>16.</span> <span data-astro-cid-mw7aashj>競品橫向比較與工具選型</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="6" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 6：附錄</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="6" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/about" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>17.</span> <span data-astro-cid-mw7aashj>關於作者</span>  </a> </li> </ul> </div> </nav> <div id="ov" data-astro-cid-mw7aashj></div> <main data-astro-cid-mw7aashj> <div class="cb" data-astro-cid-mw7aashj>  <span class="clabel">第 15 章 · Part 5：進階應用與生態</span> <h1>Cypher 圖查詢與 Wiki 自動生成</h1> <p class="cdesc">用圖查詢語言直接對話知識圖譜，讓文件自己寫自己</p> <p>
+前幾章介紹的 <code>impact</code>、<code>context</code>、<code>query</code>
+等工具，是 GitNexus 為大多數場景設計的高階介面——它們已經把最常見的
+    查詢模式封裝好，讓 Agent 不需要了解底層圖結構就能得到有用的答案。
+</p> <p>
+本章要介紹的兩個功能，面向的是想走得更深的進階玩家：
+</p> <ul> <li><strong>Cypher 圖查詢</strong>：繞過高階工具，直接用圖查詢語言讀取知識圖譜的原始資料，寫出任意形狀的自訂查詢</li> <li><strong>Wiki 自動生成</strong>：用 LLM 把知識圖譜轉換成人類可讀的模組文件，讓架構文件隨程式碼一起演進</li> </ul> <hr> <h2>一、Cypher 圖查詢</h2> <h3>為什麼需要 Cypher？</h3> <p>
+高階工具（<code>impact</code>、<code>context</code>）的設計假設你知道「要問什麼」——
+    你有一個目標符號，想知道它的上下游或影響範圍。
+    但有時候問題本身就是模糊的：
+</p> <ul> <li>「哪些函數橫跨了兩個不同的功能聚類？」</li> <li>「Authentication 模組裡，哪些符號被外部模組高置信度呼叫？」</li> <li>「整個 codebase 有多少孤立符號（沒有呼叫、也沒人呼叫）？」</li> </ul> <p>
+這類開放式問題，用高階工具很難一次拿到答案。
+<code>cypher</code> MCP 工具讓你直接對圖資料庫發送
+<a href="https://neo4j.com/docs/cypher-manual/" target="_blank">Cypher 語言</a>查詢，
+    拿回原始圖資料，就像對 SQL 資料庫下 SELECT 一樣。
+</p> <div class="call info"> <p> <strong>底層資料庫：LadybugDB</strong><br>
+GitNexus 使用 LadybugDB（前身為 KuzuDB）作為嵌入式圖資料庫。
+      LadybugDB 支援 openCypher 語法的子集，主要子句
+<code>MATCH</code>、<code>WHERE</code>、<code>RETURN</code>、<code>ORDER BY</code>、
+<code>LIMIT</code>、<code>OPTIONAL MATCH</code> 均可使用。
+</p> </div> <h3>先讀 Schema，再寫查詢</h3> <p>
+下手 Cypher 前，最重要的一步是了解圖的結構。
+    GitNexus 透過 MCP Resource 暴露完整的 Schema：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe></span> <button class="cb-copy" data-code="# 查看知識圖譜的完整 Schema
+# 在使用 Cypher 前，先理解圖的結構
+
+# 方法 1：透過 MCP Resource（推薦）
+gitnexus://repo/{name}/schema
+
+# 方法 2：Cypher 探索節點類型
+MATCH (n) RETURN DISTINCT labels(n) AS nodeTypes, count(n) AS count
+ORDER BY count DESC
+
+# 方法 3：探索關係類型
+MATCH ()-[r:CodeRelation]->()
+RETURN DISTINCT r.type AS relType, count(r) AS count
+ORDER BY count DESC" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 查看知識圖譜的完整 Schema</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 在使用 Cypher 前，先理解圖的結構</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 方法 1：透過 MCP Resource（推薦）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus://repo/</span><span style="color:#98C379">{name}</span><span style="color:#61AFEF">/schema</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 方法 2：Cypher 探索節點類型</span></span>
+<span class="line"><span style="color:#61AFEF">MATCH</span><span style="color:#ABB2BF"> (n) RETURN DISTINCT labels(</span><span style="color:#61AFEF">n</span><span style="color:#ABB2BF">) AS nodeTypes, count(</span><span style="color:#61AFEF">n</span><span style="color:#ABB2BF">) AS count</span></span>
+<span class="line"><span style="color:#61AFEF">ORDER</span><span style="color:#98C379"> BY</span><span style="color:#98C379"> count</span><span style="color:#98C379"> DESC</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 方法 3：探索關係類型</span></span>
+<span class="line"><span style="color:#61AFEF">MATCH</span><span style="color:#ABB2BF"> ()</span><span style="color:#61AFEF">-[r:CodeRelation]-></span><span style="color:#ABB2BF">()</span></span>
+<span class="line"><span style="color:#61AFEF">RETURN</span><span style="color:#98C379"> DISTINCT</span><span style="color:#98C379"> r.type</span><span style="color:#98C379"> AS</span><span style="color:#98C379"> relType,</span><span style="color:#98C379"> count</span><span style="color:#ABB2BF">(</span><span style="color:#61AFEF">r</span><span style="color:#ABB2BF">) </span><span style="color:#98C379">AS</span><span style="color:#98C379"> count</span></span>
+<span class="line"><span style="color:#61AFEF">ORDER</span><span style="color:#98C379"> BY</span><span style="color:#98C379"> count</span><span style="color:#98C379"> DESC</span></span></code></pre> </div> </div>  <script type="module">document.querySelectorAll(".cb-copy").forEach(e=>{e.addEventListener("click",()=>{const t=e.dataset.code;t&&navigator.clipboard.writeText(t).then(()=>{e.textContent="已複製!",e.classList.add("copied"),setTimeout(()=>{e.textContent="複製",e.classList.remove("copied")},2e3)})})});</script> <p>知識圖譜的主要節點與關係如下：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe></span> <button class="cb-copy" data-code="# GitNexus 知識圖譜 — 主要節點類型
+
+節點類型（Node Labels）：
+  Symbol        函數、類別、方法、介面等程式碼符號
+  File          原始碼檔案
+  Directory     目錄節點
+  Community     Leiden 演算法偵測到的功能聚類（模組）
+  Process       從入口點追蹤到的執行流程
+
+Symbol 節點的常見屬性：
+  name          符號名稱（如 validateUser）
+  kind          類型（Function / Class / Method / Interface / ...）
+  filePath      所在檔案路徑
+  startLine     起始行號
+  uid           唯一識別碼（格式：Kind:filePath:name）
+
+關係類型（CodeRelation.type 的可能值）：
+  CALLS         函數呼叫關係
+  IMPORTS       模組匯入關係
+  EXTENDS       繼承關係
+  IMPLEMENTS    介面實作關係
+  MEMBER_OF     隸屬於某個 Community（聚類）
+  PART_OF       步驟隸屬於某個 Process（執行流）" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># GitNexus 知識圖譜 — 主要節點類型</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>節點類型（Node Labels）：</span></span>
+<span class="line"><span>  Symbol        函數、類別、方法、介面等程式碼符號</span></span>
+<span class="line"><span>  File          原始碼檔案</span></span>
+<span class="line"><span>  Directory     目錄節點</span></span>
+<span class="line"><span>  Community     Leiden 演算法偵測到的功能聚類（模組）</span></span>
+<span class="line"><span>  Process       從入口點追蹤到的執行流程</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Symbol 節點的常見屬性：</span></span>
+<span class="line"><span>  name          符號名稱（如 validateUser）</span></span>
+<span class="line"><span>  kind          類型（Function / Class / Method / Interface / ...）</span></span>
+<span class="line"><span>  filePath      所在檔案路徑</span></span>
+<span class="line"><span>  startLine     起始行號</span></span>
+<span class="line"><span>  uid           唯一識別碼（格式：Kind:filePath:name）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>關係類型（CodeRelation.type 的可能值）：</span></span>
+<span class="line"><span>  CALLS         函數呼叫關係</span></span>
+<span class="line"><span>  IMPORTS       模組匯入關係</span></span>
+<span class="line"><span>  EXTENDS       繼承關係</span></span>
+<span class="line"><span>  IMPLEMENTS    介面實作關係</span></span>
+<span class="line"><span>  MEMBER_OF     隸屬於某個 Community（聚類）</span></span>
+<span class="line"><span>  PART_OF       步驟隸屬於某個 Process（執行流）</span></span></code></pre> </div> </div>   <h3>基礎查詢範例</h3> <p>掌握 Schema 後，就可以開始寫查詢。以下從最簡單的情境開始：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe></span> <button class="cb-copy" data-code="# ── 基礎查詢範例 ──
+
+# 1. 找出所有叫做 validateUser 的符號
+MATCH (s:Symbol {name: 'validateUser'})
+RETURN s.name, s.kind, s.filePath, s.startLine
+
+# 2. 找所有 Class（限前 20 筆）
+MATCH (s:Symbol {kind: 'Class'})
+RETURN s.name, s.filePath
+ORDER BY s.name
+LIMIT 20
+
+# 3. 找所有認證相關的 Community（聚類）
+MATCH (c:Community)
+WHERE c.heuristicLabel CONTAINS 'Auth' OR c.heuristicLabel CONTAINS 'Login'
+RETURN c.heuristicLabel, c.id" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="cypher"><code><span class="line"><span style="color:#ABB2BF"># ── </span><span style="color:#E06C75">基礎查詢範例</span><span style="color:#ABB2BF"> ──</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#D19A66">1</span><span style="color:#ABB2BF">. </span><span style="color:#E06C75">找出所有叫做</span><span style="color:#E06C75"> validateUser</span><span style="color:#E06C75"> 的符號</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">name</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'validateUser'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#E06C75"> s</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">kind</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">filePath</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">startLine</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#D19A66">2</span><span style="color:#ABB2BF">. </span><span style="color:#E06C75">找所有</span><span style="color:#E06C75"> Class</span><span style="color:#ABB2BF">（</span><span style="color:#E06C75">限前</span><span style="color:#D19A66"> 20</span><span style="color:#E06C75"> 筆</span><span style="color:#ABB2BF">）</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">kind</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'Class'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#E06C75"> s</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">filePath</span></span>
+<span class="line"><span style="color:#C678DD">ORDER BY</span><span style="color:#E06C75"> s</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span></span>
+<span class="line"><span style="color:#C678DD">LIMIT</span><span style="color:#D19A66"> 20</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#D19A66">3</span><span style="color:#ABB2BF">. </span><span style="color:#E06C75">找所有認證相關的</span><span style="color:#E06C75"> Community</span><span style="color:#ABB2BF">（</span><span style="color:#E06C75">聚類</span><span style="color:#ABB2BF">）</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">c</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Community</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">WHERE</span><span style="color:#E06C75"> c</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">heuristicLabel</span><span style="color:#E06C75"> CONTAINS</span><span style="color:#98C379"> 'Auth'</span><span style="color:#56B6C2"> OR</span><span style="color:#E06C75"> c</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">heuristicLabel</span><span style="color:#E06C75"> CONTAINS</span><span style="color:#98C379"> 'Login'</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#E06C75"> c</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">heuristicLabel</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">c</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">id</span></span></code></pre> </div> </div>   <h3>呼叫鏈查詢</h3> <p>
+呼叫鏈是 Cypher 最有價值的使用場景——你可以沿著
+<code>CALLS</code> 關係追蹤任意深度的上下游，並用
+<code>confidence</code> 屬性過濾低置信度的弱關係：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe></span> <button class="cb-copy" data-code="# ── 呼叫鏈查詢 ──
+
+# 找出直接呼叫 validateUser 的所有函數
+MATCH (caller:Symbol)-[r:CodeRelation {type: 'CALLS'}]->(fn:Symbol {name: 'validateUser'})
+RETURN caller.name, caller.filePath, r.confidence
+ORDER BY r.confidence DESC
+
+# 找 validateUser 所有下游呼叫（往外兩層）
+MATCH (fn:Symbol {name: 'validateUser'})
+      -[:CodeRelation {type: 'CALLS'}*1..2]->(callee:Symbol)
+RETURN DISTINCT callee.name, callee.filePath, callee.kind
+
+# 只取高置信度的呼叫關係（>= 0.8）
+MATCH (caller:Symbol)-[r:CodeRelation {type: 'CALLS'}]->(fn:Symbol {name: 'validateUser'})
+WHERE r.confidence >= 0.8
+RETURN caller.name, fn.name, r.confidence
+ORDER BY r.confidence DESC" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="cypher"><code><span class="line"><span style="color:#ABB2BF"># ── </span><span style="color:#E06C75">呼叫鏈查詢</span><span style="color:#ABB2BF"> ──</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">找出直接呼叫</span><span style="color:#E06C75"> validateUser</span><span style="color:#E06C75"> 的所有函數</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">caller</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#ABB2BF">)</span><span style="color:#56B6C2">-</span><span style="color:#ABB2BF">[</span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'CALLS'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-></span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">fn</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">name</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'validateUser'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#E06C75"> caller</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">caller</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">filePath</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">confidence</span></span>
+<span class="line"><span style="color:#C678DD">ORDER BY</span><span style="color:#E06C75"> r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">confidence</span><span style="color:#C678DD"> DESC</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">找</span><span style="color:#E06C75"> validateUser</span><span style="color:#E06C75"> 所有下游呼叫</span><span style="color:#ABB2BF">（</span><span style="color:#E06C75">往外兩層</span><span style="color:#ABB2BF">）</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">fn</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">name</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'validateUser'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#56B6C2">      -</span><span style="color:#ABB2BF">[:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'CALLS'</span><span style="color:#C678DD">}</span><span style="color:#56B6C2">*1..2</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-></span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">callee</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#C678DD"> DISTINCT</span><span style="color:#E06C75"> callee</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">callee</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">filePath</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">callee</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">kind</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">只取高置信度的呼叫關係</span><span style="color:#ABB2BF">（>= </span><span style="color:#D19A66">0.8</span><span style="color:#ABB2BF">）</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">caller</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#ABB2BF">)</span><span style="color:#56B6C2">-</span><span style="color:#ABB2BF">[</span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'CALLS'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-></span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">fn</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">name</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'validateUser'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">WHERE</span><span style="color:#E06C75"> r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">confidence</span><span style="color:#ABB2BF"> >= </span><span style="color:#D19A66">0.8</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#E06C75"> caller</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">fn</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">confidence</span></span>
+<span class="line"><span style="color:#C678DD">ORDER BY</span><span style="color:#E06C75"> r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">confidence</span><span style="color:#C678DD"> DESC</span></span></code></pre> </div> </div>   <div class="call tip"> <p> <strong>Cypher 的 <code>*1..2</code> 語法</strong><br> <code>-[:CodeRelation]*1..2-&gt;</code> 表示「沿此關係追蹤 1 到 2 層」。
+      追蹤深度越大，查詢時間越長；建議先從 1..2 開始，確認結果再加深。
+</p> </div> <h3>聚類（Community）查詢</h3> <p>
+Community 節點是 Leiden 演算法偵測出的功能模組。
+    透過 <code>MEMBER_OF</code> 關係，你可以跨模組分析呼叫模式：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe></span> <button class="cb-copy" data-code="# ── 聚類（Community）查詢 ──
+
+# 找出 Authentication 聚類的所有成員函數，以及呼叫它們的外部符號
+MATCH (c:Community {heuristicLabel: 'Authentication'})
+      <-[:CodeRelation {type: 'MEMBER_OF'}]-(fn:Symbol)
+MATCH (caller:Symbol)-[r:CodeRelation {type: 'CALLS'}]->(fn)
+WHERE r.confidence > 0.8
+RETURN caller.name, fn.name, r.confidence
+ORDER BY r.confidence DESC
+
+# 計算每個聚類的規模與平均呼叫置信度
+MATCH (c:Community)<-[:CodeRelation {type: 'MEMBER_OF'}]-(s:Symbol)
+OPTIONAL MATCH (caller)-[r:CodeRelation {type: 'CALLS'}]->(s)
+RETURN c.heuristicLabel, count(DISTINCT s) AS memberCount,
+       avg(r.confidence) AS avgConfidence
+ORDER BY memberCount DESC" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="cypher"><code><span class="line"><span style="color:#ABB2BF"># ── </span><span style="color:#E06C75">聚類</span><span style="color:#ABB2BF">（</span><span style="color:#E06C75">Community</span><span style="color:#ABB2BF">）</span><span style="color:#E06C75">查詢</span><span style="color:#ABB2BF"> ──</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">找出</span><span style="color:#E06C75"> Authentication</span><span style="color:#E06C75"> 聚類的所有成員函數</span><span style="color:#ABB2BF">，</span><span style="color:#E06C75">以及呼叫它們的外部符號</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">c</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Community</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">heuristicLabel</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'Authentication'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#56B6C2">      &#x3C;-</span><span style="color:#ABB2BF">[:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'MEMBER_OF'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">fn</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">caller</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#ABB2BF">)</span><span style="color:#56B6C2">-</span><span style="color:#ABB2BF">[</span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'CALLS'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-></span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">fn</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">WHERE</span><span style="color:#E06C75"> r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">confidence</span><span style="color:#ABB2BF"> > </span><span style="color:#D19A66">0.8</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#E06C75"> caller</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">fn</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">confidence</span></span>
+<span class="line"><span style="color:#C678DD">ORDER BY</span><span style="color:#E06C75"> r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">confidence</span><span style="color:#C678DD"> DESC</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">計算每個聚類的規模與平均呼叫置信度</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">c</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Community</span><span style="color:#ABB2BF">)</span><span style="color:#56B6C2">&#x3C;-</span><span style="color:#ABB2BF">[:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'MEMBER_OF'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#E06C75">OPTIONAL</span><span style="color:#C678DD"> MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">caller</span><span style="color:#ABB2BF">)</span><span style="color:#56B6C2">-</span><span style="color:#ABB2BF">[</span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'CALLS'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-></span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#E06C75"> c</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">heuristicLabel</span><span style="color:#ABB2BF">, </span><span style="color:#56B6C2">count</span><span style="color:#ABB2BF">(</span><span style="color:#C678DD">DISTINCT</span><span style="color:#E06C75"> s</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">AS</span><span style="color:#E06C75"> memberCount</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#56B6C2">       avg</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">confidence</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">AS</span><span style="color:#E06C75"> avgConfidence</span></span>
+<span class="line"><span style="color:#C678DD">ORDER BY</span><span style="color:#E06C75"> memberCount</span><span style="color:#C678DD"> DESC</span></span></code></pre> </div> </div>   <h3>執行流程（Process）查詢</h3> <p>
+Process 節點代表從入口點往下追蹤到的執行路徑（如 LoginFlow、CheckoutFlow）。
+    用 Cypher 可以取得高階工具難以呈現的步驟細節：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe></span> <button class="cb-copy" data-code="# ── 執行流程（Process）查詢 ──
+
+# 列出所有 Process（執行流程）及其步驟數
+MATCH (p:Process)
+RETURN p.name, p.summary, p.stepCount
+ORDER BY p.stepCount DESC
+LIMIT 10
+
+# 查某個執行流程的所有步驟，按順序排列
+MATCH (s:Symbol)-[r:CodeRelation {type: 'PART_OF'}]->(p:Process {name: 'LoginFlow'})
+RETURN s.name, s.filePath, r.stepIndex
+ORDER BY r.stepIndex ASC
+
+# 找哪些 Process 包含 validateUser 這個符號
+MATCH (fn:Symbol {name: 'validateUser'})
+      -[r:CodeRelation {type: 'PART_OF'}]->(p:Process)
+RETURN p.name, p.summary, r.stepIndex" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="cypher"><code><span class="line"><span style="color:#ABB2BF"># ── </span><span style="color:#E06C75">執行流程</span><span style="color:#ABB2BF">（</span><span style="color:#E06C75">Process</span><span style="color:#ABB2BF">）</span><span style="color:#E06C75">查詢</span><span style="color:#ABB2BF"> ──</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">列出所有</span><span style="color:#E06C75"> Process</span><span style="color:#ABB2BF">（</span><span style="color:#E06C75">執行流程</span><span style="color:#ABB2BF">）</span><span style="color:#E06C75">及其步驟數</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">p</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Process</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#E06C75"> p</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">p</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">summary</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">p</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">stepCount</span></span>
+<span class="line"><span style="color:#C678DD">ORDER BY</span><span style="color:#E06C75"> p</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">stepCount</span><span style="color:#C678DD"> DESC</span></span>
+<span class="line"><span style="color:#C678DD">LIMIT</span><span style="color:#D19A66"> 10</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">查某個執行流程的所有步驟</span><span style="color:#ABB2BF">，</span><span style="color:#E06C75">按順序排列</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#ABB2BF">)</span><span style="color:#56B6C2">-</span><span style="color:#ABB2BF">[</span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'PART_OF'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-></span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">p</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Process</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">name</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'LoginFlow'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#E06C75"> s</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">filePath</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">stepIndex</span></span>
+<span class="line"><span style="color:#C678DD">ORDER BY</span><span style="color:#E06C75"> r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">stepIndex</span><span style="color:#C678DD"> ASC</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">找哪些</span><span style="color:#E06C75"> Process</span><span style="color:#E06C75"> 包含</span><span style="color:#E06C75"> validateUser</span><span style="color:#E06C75"> 這個符號</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">fn</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">name</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'validateUser'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#56B6C2">      -</span><span style="color:#ABB2BF">[</span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'PART_OF'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-></span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">p</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Process</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#E06C75"> p</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">p</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">summary</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">stepIndex</span></span></code></pre> </div> </div>   <h3>進階：跨聚類呼叫 + 孤立符號偵測</h3> <p>
+以下兩個查詢展示了 Cypher 在 codebase 健康度稽核上的應用：
+    找出最容易引發跨模組 Bug 的呼叫點，以及找出沒有任何連結的孤立函數：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe></span> <button class="cb-copy" data-code="# ── 進階：影響鏈 + 聚類交叉分析 ──
+
+# 找跨兩個聚類的高置信度呼叫（最容易引發跨模組 Bug 的地方）
+MATCH (caller:Symbol)-[r:CodeRelation {type: 'CALLS'}]->(callee:Symbol)
+WHERE r.confidence > 0.75
+MATCH (caller)-[:CodeRelation {type: 'MEMBER_OF'}]->(c1:Community)
+MATCH (callee)-[:CodeRelation {type: 'MEMBER_OF'}]->(c2:Community)
+WHERE c1.id <> c2.id
+RETURN c1.heuristicLabel AS fromModule, c2.heuristicLabel AS toModule,
+       caller.name, callee.name, r.confidence
+ORDER BY r.confidence DESC
+LIMIT 20
+
+# 找「孤立」符號——沒有被任何人呼叫且自己也不呼叫任何人
+MATCH (s:Symbol {kind: 'Function'})
+WHERE NOT (s)-[:CodeRelation {type: 'CALLS'}]->()
+  AND NOT ()-[:CodeRelation {type: 'CALLS'}]->(s)
+RETURN s.name, s.filePath
+ORDER BY s.filePath" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="cypher"><code><span class="line"><span style="color:#ABB2BF"># ── </span><span style="color:#E06C75">進階</span><span style="color:#ABB2BF">：</span><span style="color:#E06C75">影響鏈</span><span style="color:#ABB2BF"> + </span><span style="color:#E06C75">聚類交叉分析</span><span style="color:#ABB2BF"> ──</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">找跨兩個聚類的高置信度呼叫</span><span style="color:#ABB2BF">（</span><span style="color:#E06C75">最容易引發跨模組</span><span style="color:#E06C75"> Bug</span><span style="color:#E06C75"> 的地方</span><span style="color:#ABB2BF">）</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">caller</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#ABB2BF">)</span><span style="color:#56B6C2">-</span><span style="color:#ABB2BF">[</span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'CALLS'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-></span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">callee</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">WHERE</span><span style="color:#E06C75"> r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">confidence</span><span style="color:#ABB2BF"> > </span><span style="color:#D19A66">0.75</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">caller</span><span style="color:#ABB2BF">)</span><span style="color:#56B6C2">-</span><span style="color:#ABB2BF">[:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'MEMBER_OF'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-></span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">c1</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Community</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">callee</span><span style="color:#ABB2BF">)</span><span style="color:#56B6C2">-</span><span style="color:#ABB2BF">[:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'MEMBER_OF'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-></span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">c2</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Community</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">WHERE</span><span style="color:#E06C75"> c1</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">id</span><span style="color:#ABB2BF"> &#x3C;> </span><span style="color:#E06C75">c2</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">id</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#E06C75"> c1</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">heuristicLabel</span><span style="color:#C678DD"> AS</span><span style="color:#E06C75"> fromModule</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">c2</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">heuristicLabel</span><span style="color:#C678DD"> AS</span><span style="color:#E06C75"> toModule</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">       caller</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">callee</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">confidence</span></span>
+<span class="line"><span style="color:#C678DD">ORDER BY</span><span style="color:#E06C75"> r</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">confidence</span><span style="color:#C678DD"> DESC</span></span>
+<span class="line"><span style="color:#C678DD">LIMIT</span><span style="color:#D19A66"> 20</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ABB2BF"># </span><span style="color:#E06C75">找</span><span style="color:#ABB2BF">「</span><span style="color:#E06C75">孤立</span><span style="color:#ABB2BF">」</span><span style="color:#E06C75">符號</span><span style="color:#ABB2BF">——</span><span style="color:#E06C75">沒有被任何人呼叫且自己也不呼叫任何人</span></span>
+<span class="line"><span style="color:#C678DD">MATCH</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">:</span><span style="color:#E06C75">Symbol</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">kind</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'Function'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">WHERE</span><span style="color:#C678DD"> NOT</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">)</span><span style="color:#56B6C2">-</span><span style="color:#ABB2BF">[:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'CALLS'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-></span><span style="color:#ABB2BF">()</span></span>
+<span class="line"><span style="color:#56B6C2">  AND</span><span style="color:#C678DD"> NOT</span><span style="color:#ABB2BF"> ()</span><span style="color:#56B6C2">-</span><span style="color:#ABB2BF">[:</span><span style="color:#E5C07B">CodeRelation</span><span style="color:#C678DD"> {</span><span style="color:#E06C75">type</span><span style="color:#C678DD">:</span><span style="color:#98C379"> 'CALLS'</span><span style="color:#C678DD">}</span><span style="color:#ABB2BF">]</span><span style="color:#56B6C2">-></span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#C678DD">RETURN</span><span style="color:#E06C75"> s</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">s</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">filePath</span></span>
+<span class="line"><span style="color:#C678DD">ORDER BY</span><span style="color:#E06C75"> s</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">filePath</span></span></code></pre> </div> </div>   <h3>Cypher vs 高階工具：如何選擇？</h3> <table> <thead> <tr> <th>情境</th> <th>建議工具</th> <th>原因</th> </tr> </thead> <tbody> <tr> <td>分析某個符號的影響範圍</td> <td><code>impact</code></td> <td>已封裝深度分組與置信度邏輯，結果直接可用</td> </tr> <tr> <td>取得某個符號的上下游全貌</td> <td><code>context</code></td> <td>單次查詢回傳 360 度視角，比手寫 Cypher 更快</td> </tr> <tr> <td>自然語言搜尋程式碼</td> <td><code>query</code></td> <td>混合 BM25 + 語義向量，語義搜尋需要此工具</td> </tr> <tr> <td>自訂多節點關聯分析</td> <td><code>cypher</code></td> <td>高階工具無法表達的複雜圖模式</td> </tr> <tr> <td>codebase 健康度稽核</td> <td><code>cypher</code></td> <td>批次統計（孤立符號、循環依賴、跨模組耦合）</td> </tr> <tr> <td>探索圖 Schema 結構</td> <td>MCP Resource</td> <td><code>gitnexus://repo/&lbrace;name&rbrace;/schema</code> 最完整</td> </tr> </tbody> </table> <hr> <h2>二、Wiki 自動生成</h2> <h3>Wiki 在解什麼問題？</h3> <p>
+軟體專案有一個普遍的矛盾：程式碼一直在演進，文件卻永遠在過期。
+    手寫的架構文件在兩週後可能就已經和實際程式碼脫節，
+    但要持續維護文件又需要大量人力。
+</p> <p> <code>gitnexus wiki</code> 的思路是：
+<strong>既然知識圖譜已經精確掌握了程式碼的模組結構，就讓 LLM 把圖譜翻譯成人類可讀的文件。</strong>
+每次程式碼改動後重新執行，文件就能反映當前實際狀態。
+</p> <h3>工作原理</h3> <p><code>gitnexus wiki</code> 的生成流程分三個階段：</p> <ol> <li> <strong>讀取圖譜</strong>：從 LadybugDB 讀取 Community 節點、Symbol 清單、Process 路徑
+</li> <li> <strong>LLM 分組與描述</strong>：將符號分配到對應模組，對每個模組生成職責描述、
+      關鍵符號說明、執行流程摘要
+</li> <li> <strong>生成 Markdown 文件</strong>：每個模組一個 <code>.md</code> 頁面，
+      加上一份整體架構概覽的 <code>index.md</code> </li> </ol> <p>整個流程<strong>只有 LLM 呼叫需要外部網路</strong>，圖譜讀取仍在本地完成。</p> <h3>快速上手</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe></span> <button class="cb-copy" data-code="# gitnexus wiki — 基本用法
+
+# 1. 最簡單的方式（需要 OPENAI_API_KEY）
+export OPENAI_API_KEY=sk-...
+gitnexus wiki
+
+# 2. 指定模型（gpt-4o 品質更好，gpt-4o-mini 速度更快）
+gitnexus wiki --model gpt-4o
+
+# 3. 使用 Anthropic / Claude
+export ANTHROPIC_API_KEY=sk-ant-...
+gitnexus wiki --model claude-sonnet-4-6 --base-url https://api.anthropic.com/v1
+
+# 4. 使用 Ollama（完全本地，無 API Key 需求）
+gitnexus wiki --model ollama/llama3 --base-url http://localhost:11434/v1
+
+# 5. 強制全量重新生成（程式碼改動較多時使用）
+gitnexus wiki --force" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># gitnexus wiki — 基本用法</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 1. 最簡單的方式（需要 OPENAI_API_KEY）</span></span>
+<span class="line"><span style="color:#C678DD">export</span><span style="color:#E06C75"> OPENAI_API_KEY</span><span style="color:#56B6C2">=</span><span style="color:#E06C75">sk-</span><span style="color:#ABB2BF">...</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> wiki</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 2. 指定模型（gpt-4o 品質更好，gpt-4o-mini 速度更快）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> wiki</span><span style="color:#D19A66"> --model</span><span style="color:#98C379"> gpt-4o</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 3. 使用 Anthropic / Claude</span></span>
+<span class="line"><span style="color:#C678DD">export</span><span style="color:#E06C75"> ANTHROPIC_API_KEY</span><span style="color:#56B6C2">=</span><span style="color:#E06C75">sk-ant-</span><span style="color:#ABB2BF">...</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> wiki</span><span style="color:#D19A66"> --model</span><span style="color:#98C379"> claude-sonnet-4-6</span><span style="color:#D19A66"> --base-url</span><span style="color:#98C379"> https://api.anthropic.com/v1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 4. 使用 Ollama（完全本地，無 API Key 需求）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> wiki</span><span style="color:#D19A66"> --model</span><span style="color:#98C379"> ollama/llama3</span><span style="color:#D19A66"> --base-url</span><span style="color:#98C379"> http://localhost:11434/v1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 5. 強制全量重新生成（程式碼改動較多時使用）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> wiki</span><span style="color:#D19A66"> --force</span></span></code></pre> </div> </div>   <h3>完整參數說明</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe></span> <button class="cb-copy" data-code="# gitnexus wiki — 完整參數說明
+
+gitnexus wiki [path]
+
+選項：
+  --model <model>       LLM 模型名稱（預設：gpt-4o-mini）
+  --base-url <url>      自訂 LLM API base URL（配合 Ollama / Azure / Anthropic）
+  --force               強制全量重新生成，忽略快取
+  --timeout <seconds>   單次 LLM 請求逾時秒數（預設：無限制）
+  --retries <n>         每次 LLM 請求的最大重試次數（預設：3）
+  --lang <language>     文件輸出語言（english / chinese / spanish / japanese 等）
+
+# 中文 Wiki（繁體中文輸出）
+gitnexus wiki --lang chinese
+
+# 大型 codebase 建議加上 timeout 與 retries 避免掛住
+gitnexus wiki --model gpt-4o --timeout 120 --retries 5" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># gitnexus wiki — 完整參數說明</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> wiki</span><span style="color:#ABB2BF"> [path]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">選項：</span></span>
+<span class="line"><span style="color:#61AFEF">  --model</span><span style="color:#ABB2BF"> &#x3C;</span><span style="color:#98C379">mode</span><span style="color:#ABB2BF">l>       </span><span style="color:#98C379">LLM</span><span style="color:#98C379"> 模型名稱（預設：gpt-4o-mini）</span></span>
+<span class="line"><span style="color:#61AFEF">  --base-url</span><span style="color:#ABB2BF"> &#x3C;</span><span style="color:#98C379">ur</span><span style="color:#ABB2BF">l>      </span><span style="color:#98C379">自訂</span><span style="color:#98C379"> LLM</span><span style="color:#98C379"> API</span><span style="color:#98C379"> base</span><span style="color:#98C379"> URL（配合</span><span style="color:#98C379"> Ollama</span><span style="color:#98C379"> /</span><span style="color:#98C379"> Azure</span><span style="color:#98C379"> /</span><span style="color:#98C379"> Anthropic）</span></span>
+<span class="line"><span style="color:#61AFEF">  --force</span><span style="color:#98C379">               強制全量重新生成，忽略快取</span></span>
+<span class="line"><span style="color:#61AFEF">  --timeout</span><span style="color:#ABB2BF"> &#x3C;</span><span style="color:#98C379">second</span><span style="color:#ABB2BF">s>   </span><span style="color:#98C379">單次</span><span style="color:#98C379"> LLM</span><span style="color:#98C379"> 請求逾時秒數（預設：無限制）</span></span>
+<span class="line"><span style="color:#61AFEF">  --retries</span><span style="color:#ABB2BF"> &#x3C;n>         </span><span style="color:#98C379">每次</span><span style="color:#98C379"> LLM</span><span style="color:#98C379"> 請求的最大重試次數（預設：3）</span></span>
+<span class="line"><span style="color:#61AFEF">  --lang</span><span style="color:#ABB2BF"> &#x3C;</span><span style="color:#98C379">languag</span><span style="color:#ABB2BF">e>     </span><span style="color:#98C379">文件輸出語言（english</span><span style="color:#98C379"> /</span><span style="color:#98C379"> chinese</span><span style="color:#98C379"> /</span><span style="color:#98C379"> spanish</span><span style="color:#98C379"> /</span><span style="color:#98C379"> japanese</span><span style="color:#98C379"> 等）</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 中文 Wiki（繁體中文輸出）</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> wiki</span><span style="color:#D19A66"> --lang</span><span style="color:#98C379"> chinese</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 大型 codebase 建議加上 timeout 與 retries 避免掛住</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> wiki</span><span style="color:#D19A66"> --model</span><span style="color:#98C379"> gpt-4o</span><span style="color:#D19A66"> --timeout</span><span style="color:#D19A66"> 120</span><span style="color:#D19A66"> --retries</span><span style="color:#D19A66"> 5</span></span></code></pre> </div> </div>   <h3>Wiki 的輸出結構</h3> <p>
+生成完成後，Wiki 文件存放在 <code>.gitnexus/wiki/</code>。
+    以一個典型的電商後端專案為例：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe></span> <button class="cb-copy" data-code="# Wiki 生成後的目錄結構（範例）
+
+.gitnexus/wiki/
+├── index.md              ← 整體架構概覽頁
+├── authentication.md     ← Authentication 模組文件
+├── payment.md            ← Payment 模組文件
+├── user-management.md    ← User Management 模組文件
+├── api-layer.md          ← API Layer 模組文件
+└── ...                   ← 其他 Leiden 偵測出的模組
+
+# index.md 內容結構（概覽頁）
+## 專案架構概覽
+- 模組清單（含每個模組的用途摘要）
+- 入口點（Entry Points）
+- 主要執行流程（Processes）
+- 模組間依賴關係（Mermaid 圖）
+
+# authentication.md 內容結構（模組頁）
+## Authentication 模組
+- 模組職責描述
+- 關鍵符號（函數 / 類別）清單
+- 主要執行流程（如 LoginFlow）
+- 對外依賴（呼叫了哪些其他模組）
+- 被誰依賴（哪些模組呼叫了這裡）" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># Wiki 生成後的目錄結構（範例）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>.gitnexus/wiki/</span></span>
+<span class="line"><span>├── index.md              ← 整體架構概覽頁</span></span>
+<span class="line"><span>├── authentication.md     ← Authentication 模組文件</span></span>
+<span class="line"><span>├── payment.md            ← Payment 模組文件</span></span>
+<span class="line"><span>├── user-management.md    ← User Management 模組文件</span></span>
+<span class="line"><span>├── api-layer.md          ← API Layer 模組文件</span></span>
+<span class="line"><span>└── ...                   ← 其他 Leiden 偵測出的模組</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># index.md 內容結構（概覽頁）</span></span>
+<span class="line"><span>## 專案架構概覽</span></span>
+<span class="line"><span>- 模組清單（含每個模組的用途摘要）</span></span>
+<span class="line"><span>- 入口點（Entry Points）</span></span>
+<span class="line"><span>- 主要執行流程（Processes）</span></span>
+<span class="line"><span>- 模組間依賴關係（Mermaid 圖）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># authentication.md 內容結構（模組頁）</span></span>
+<span class="line"><span>## Authentication 模組</span></span>
+<span class="line"><span>- 模組職責描述</span></span>
+<span class="line"><span>- 關鍵符號（函數 / 類別）清單</span></span>
+<span class="line"><span>- 主要執行流程（如 LoginFlow）</span></span>
+<span class="line"><span>- 對外依賴（呼叫了哪些其他模組）</span></span>
+<span class="line"><span>- 被誰依賴（哪些模組呼叫了這裡）</span></span></code></pre> </div> </div>   <div class="call info"> <p> <strong>Wiki 文件的品質取決於</strong>：
+      (1) 索引的完整度（先確認 <code>gitnexus analyze</code> 順利完成）；
+      (2) 選用的模型（<code>gpt-4o</code> 比 <code>gpt-4o-mini</code> 描述更細膩）；
+      (3) 聚類標籤的可讀性（<code>gitnexus analyze --skills</code> 可強化聚類語義）。
+</p> </div> <h3>三種典型使用情境</h3> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe></span> <button class="cb-copy" data-code="# Wiki 的三種典型使用情境
+
+# ──────────────────────────────────────────
+# 情境 1：接手陌生 codebase
+# ──────────────────────────────────────────
+# 先索引，再生成 Wiki，再讓 Agent 讀 Wiki 後開始工作
+gitnexus analyze
+gitnexus wiki --lang chinese
+# 把 .gitnexus/wiki/index.md 貼進 Claude Code 對話
+
+# ──────────────────────────────────────────
+# 情境 2：新人 Onboarding 文件
+# ──────────────────────────────────────────
+# 生成後提交到 docs/ 資料夾，讓新人閱讀
+mkdir -p docs/architecture
+cp .gitnexus/wiki/*.md docs/architecture/
+
+# ──────────────────────────────────────────
+# 情境 3：PR Review 前快速對齊架構
+# ──────────────────────────────────────────
+# 每次大改動後重新生成，確保文件反映最新結構
+gitnexus wiki --force
+git add .gitnexus/wiki/
+git commit -m &quot;docs: regenerate architecture wiki&quot;" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># Wiki 的三種典型使用情境</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ──────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 情境 1：接手陌生 codebase</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ──────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 先索引，再生成 Wiki，再讓 Agent 讀 Wiki 後開始工作</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> analyze</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> wiki</span><span style="color:#D19A66"> --lang</span><span style="color:#98C379"> chinese</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 把 .gitnexus/wiki/index.md 貼進 Claude Code 對話</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ──────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 情境 2：新人 Onboarding 文件</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ──────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 生成後提交到 docs/ 資料夾，讓新人閱讀</span></span>
+<span class="line"><span style="color:#61AFEF">mkdir</span><span style="color:#D19A66"> -p</span><span style="color:#98C379"> docs/architecture</span></span>
+<span class="line"><span style="color:#61AFEF">cp</span><span style="color:#98C379"> .gitnexus/wiki/</span><span style="color:#E5C07B">*</span><span style="color:#98C379">.md</span><span style="color:#98C379"> docs/architecture/</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ──────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 情境 3：PR Review 前快速對齊架構</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ──────────────────────────────────────────</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 每次大改動後重新生成，確保文件反映最新結構</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> wiki</span><span style="color:#D19A66"> --force</span></span>
+<span class="line"><span style="color:#61AFEF">git</span><span style="color:#98C379"> add</span><span style="color:#98C379"> .gitnexus/wiki/</span></span>
+<span class="line"><span style="color:#61AFEF">git</span><span style="color:#98C379"> commit</span><span style="color:#D19A66"> -m</span><span style="color:#98C379"> "docs: regenerate architecture wiki"</span></span></code></pre> </div> </div>   <h3>與 DeepWiki 的比較</h3> <p>
+GitNexus 官方 README 有一句定位聲明很清楚：
+<em>「Like DeepWiki, but deeper. DeepWiki helps you understand code. GitNexus lets you analyze it.」</em> </p> <table> <thead> <tr> <th>面向</th> <th>DeepWiki</th> <th>GitNexus Wiki</th> </tr> </thead> <tbody> <tr> <td>資料來源</td> <td>直接讓 LLM 讀原始碼</td> <td>LLM 讀 GitNexus 知識圖譜（預計算的關係）</td> </tr> <tr> <td>準確度</td> <td>取決於 LLM 的推斷品質</td> <td>基於 AST 解析的確定性依賴關係</td> </tr> <tr> <td>呼叫關係</td> <td>描述性（可能遺漏）</td> <td>完整呼叫鏈（tree-sitter 解析）</td> </tr> <tr> <td>更新方式</td> <td>手動觸發、需重新分析整份 codebase</td> <td>可搭配 CI/CD；企業版支援自動增量更新</td> </tr> <tr> <td>私有程式碼</td> <td>上傳至雲端</td> <td>本地索引，只有 LLM 請求發出網路</td> </tr> </tbody> </table> <h3>企業版：Auto-updating Code Wiki</h3> <p>
+開源版的 <code>gitnexus wiki</code> 需要手動觸發。
+    對於需要持續維護文件的團隊，GitNexus 企業版提供 <strong>Auto-updating Code Wiki</strong>，
+    在每次 push 後自動重新索引並更新受影響的模組文件：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe></span> <button class="cb-copy" data-code="# 企業版：Auto-updating Code Wiki
+
+# 開源版 Wiki：手動觸發
+gitnexus wiki --force   ← 每次都要自己跑
+
+# 企業版 Wiki：自動更新
+# ─ 每次 git push 後自動觸發重新索引
+# ─ 索引完成後自動重新生成受影響模組的 Wiki 頁面
+# ─ Wiki 變更透過 PR 或通知系統推送給團隊
+
+# 企業版的自動更新循環：
+git push
+  → GitNexus Auto-reindex（偵測 diff → 只更新變更模組）
+  → Auto-update Wiki（只重寫受影響的 .md 頁面）
+  → Notify team（透過 Webhook / Slack / Email）
+
+# 查詢：企業版請洽
+# https://akonlabs.com" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 企業版：Auto-updating Code Wiki</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 開源版 Wiki：手動觸發</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> wiki</span><span style="color:#D19A66"> --force</span><span style="color:#98C379">   ←</span><span style="color:#98C379"> 每次都要自己跑</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 企業版 Wiki：自動更新</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ─ 每次 git push 後自動觸發重新索引</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ─ 索引完成後自動重新生成受影響模組的 Wiki 頁面</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ─ Wiki 變更透過 PR 或通知系統推送給團隊</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 企業版的自動更新循環：</span></span>
+<span class="line"><span style="color:#61AFEF">git</span><span style="color:#98C379"> push</span></span>
+<span class="line"><span style="color:#61AFEF">  →</span><span style="color:#98C379"> GitNexus</span><span style="color:#98C379"> Auto-reindex（偵測</span><span style="color:#98C379"> diff</span><span style="color:#98C379"> →</span><span style="color:#98C379"> 只更新變更模組）</span></span>
+<span class="line"><span style="color:#61AFEF">  →</span><span style="color:#98C379"> Auto-update</span><span style="color:#98C379"> Wiki（只重寫受影響的</span><span style="color:#98C379"> .md</span><span style="color:#98C379"> 頁面）</span></span>
+<span class="line"><span style="color:#61AFEF">  →</span><span style="color:#98C379"> Notify</span><span style="color:#98C379"> team（透過</span><span style="color:#98C379"> Webhook</span><span style="color:#98C379"> /</span><span style="color:#98C379"> Slack</span><span style="color:#98C379"> /</span><span style="color:#98C379"> Email）</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 查詢：企業版請洽</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># https://akonlabs.com</span></span></code></pre> </div> </div>   <hr> <h2>Cypher 與 Wiki 的協同使用</h2> <p>
+這兩個功能其實可以組合使用。一個典型的進階工作流：
+</p> <ol> <li>
+先用 <code>gitnexus wiki</code> 生成架構文件，快速掌握模組分布
+</li> <li>
+發現某個模組（如 Payment）耦合異常，用 Cypher 查跨模組呼叫細節：
+<br><code>MATCH (caller)-[r]-&gt;(callee) WHERE c1.id &lt;&gt; c2.id RETURN ...</code> </li> <li>
+把 Cypher 查詢結果貼進 Claude Code，請它分析是否需要重構
+</li> <li>
+重構完成、重新索引後，用 <code>gitnexus wiki --force</code> 重新生成文件驗證模組邊界是否改善
+</li> </ol> <div class="call tip"> <p> <strong>讓 Agent 寫 Cypher</strong><br>
+你不一定要自己手寫 Cypher。可以告訴 Claude Code：
+<em>「請用 <code>cypher</code> 工具查出所有橫跨 Auth 與 Payment 聚類的高置信度呼叫」</em>，
+      Agent 會先讀 Schema Resource，再生成對應的 Cypher 查詢並執行。
+</p> </div> <hr> <h2>本章小結</h2> <p> <code>cypher</code> 和 <code>wiki</code> 代表 GitNexus 使用深度的兩個極端：
+</p> <ul> <li> <strong>Cypher</strong> 是向下深挖——繞過封裝，直接操作圖的原始資料，
+      適合複雜的自訂分析和 codebase 健康度稽核
+</li> <li> <strong>Wiki</strong> 是向上抽象——把圖的結構知識翻譯成人類語言，
+      讓文件不再是靠人力維護的靜態產物，而是可以跟著程式碼演進的活文件
+</li> </ul> <p>
+掌握這兩個工具，代表你不只是在「使用」GitNexus，
+    而是把它當作可以深度客製化的知識圖譜後端。
+    下一章，我們將站到更高的視角，把 GitNexus 放進整個 AI Coding 工具生態做橫向比較，
+    幫你選出最適合自己工作流的組合。
+</p>  </div> <nav class="cnav" data-astro-cid-mw7aashj> <a href="/gitnexus/ch14-multi-repo-docker" class="prev" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>← 上一章</span> <span class="nt" data-astro-cid-mw7aashj>多倉庫架構與 Docker 部署</span> </a> <a href="/gitnexus/ch16-tool-comparison" class="next" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>下一章 →</span> <span class="nt" data-astro-cid-mw7aashj>競品橫向比較與工具選型</span> </a> </nav> </main> </div> <script>
+    // Theme
+    const html = document.documentElement;
+    const tt = document.getElementById('tt');
+    const isun = document.getElementById('isun');
+    const imoon = document.getElementById('imoon');
+    function syncIcons() {
+      const dk = html.classList.contains('dark');
+      isun.style.display = dk ? 'block' : 'none';
+      imoon.style.display = dk ? 'none' : 'block';
+    }
+    syncIcons();
+    tt?.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('cc-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      syncIcons();
+    });
+
+    // Progress
+    const pb = document.getElementById('pb');
+    window.addEventListener('scroll', () => {
+      const t = document.documentElement.scrollHeight - window.innerHeight;
+      pb.style.width = t > 0 ? `${(window.scrollY / t) * 100}%` : '0%';
+    }, { passive: true });
+
+    // Sidebar part toggles
+    document.querySelectorAll('.pt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.pid;
+        const list = document.querySelector(`[data-pl="${id}"]`);
+        btn.classList.toggle('open');
+        list?.classList.toggle('closed');
+      });
+    });
+
+    // Mobile menu
+    const sb = document.getElementById('sb');
+    const ov = document.getElementById('ov');
+    const mb = document.getElementById('mbtn');
+    const open = () => { sb.classList.add('open'); ov.classList.add('open'); document.body.style.overflow='hidden'; };
+    const close = () => { sb.classList.remove('open'); ov.classList.remove('open'); document.body.style.overflow=''; };
+    mb?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+  </script> </body> 

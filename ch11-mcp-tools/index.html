@@ -1,0 +1,330 @@
+<!DOCTYPE html><html lang="zh-TW" data-astro-cid-mw7aashj> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>16 個 MCP 工具詳解 | </title><link rel="stylesheet" href="/gitnexus/_astro/DocsLayout.BldRaKia.css">
+<style>.cb-wrap[data-astro-cid-jgrc2lfe]{margin-bottom:1.25rem}.cb-bar[data-astro-cid-jgrc2lfe]{display:flex;align-items:center;justify-content:space-between;background:#1a1a2e;border-radius:6px 6px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.05);padding:.18rem .5rem .18rem .75rem;min-height:1.8rem}.cb-label[data-astro-cid-jgrc2lfe]{color:#a6adc8;font-family:Fira Code,Cascadia Code,Consolas,monospace;font-size:.73rem;letter-spacing:.04em}.cb-inner[data-astro-cid-jgrc2lfe] pre{border-radius:0 0 8px 8px!important;margin-bottom:0!important}.cb-copy[data-astro-cid-jgrc2lfe]{background:#ffffff14;color:#888;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:.15rem .55rem;font-size:.7rem;cursor:pointer;transition:all .15s;flex-shrink:0}.cb-copy[data-astro-cid-jgrc2lfe]:hover{background:#ffffff2e;color:#fff}.cb-copy[data-astro-cid-jgrc2lfe].copied{color:#4ec9b0;border-color:#4ec9b0}
+</style></head>GitNexus 完整指南 <meta name="description" content="逐一解析 GitNexus 的 16 個 MCP 工具（11 個單倉庫 + 5 個多倉庫）：impact 影響分析、context 完整上下文、query 混合搜尋、detect_changes 變更偵測、rename 安全重命名與 cypher 原始查詢，並附上每個工具的實際使用範例。"> <link rel="icon" href="/gitnexus/favicon.svg" type="image/svg+xml"> <script>
+    (function () {
+      const s = localStorage.getItem('cc-theme');
+      const d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+    })();
+  </script>  </html> <body data-astro-cid-mw7aashj> <div id="pb" data-astro-cid-mw7aashj></div> <header data-astro-cid-mw7aashj> <div class="hi" data-astro-cid-mw7aashj> <div class="hl" data-astro-cid-mw7aashj> <button id="mbtn" class="ibtn" aria-label="選單" data-astro-cid-mw7aashj> <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" data-astro-cid-mw7aashj></path> </svg> </button> <a href="/gitnexus/" class="site-name" data-astro-cid-mw7aashj> <span class="logo" data-astro-cid-mw7aashj>GN</span>&nbsp;&nbsp;GitNexus 完整指南
+</a> </div> <div class="hr" data-astro-cid-mw7aashj> <button id="tt" class="ibtn" aria-label="切換主題" data-astro-cid-mw7aashj> <svg id="isun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" data-astro-cid-mw7aashj></path> </svg> <svg id="imoon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" data-astro-cid-mw7aashj></path> </svg> </button> </div> </div> </header> <div id="layout" data-astro-cid-mw7aashj> <nav id="sb" data-astro-cid-mw7aashj> <div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="1" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 1：認識 GitNexus</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="1" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch01-what-is-gitnexus" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>1.</span> <span data-astro-cid-mw7aashj>GitNexus 是什麼？零伺服器程式碼智慧引擎</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch02-why-knowledge-graph" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>2.</span> <span data-astro-cid-mw7aashj>AI Coding 的結構盲點：為什麼需要知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch03-graph-vs-rag" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>3.</span> <span data-astro-cid-mw7aashj>知識圖譜 vs Vector RAG vs Graph RAG</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="2" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 2：安裝與快速上手</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="2" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch04-install" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>4.</span> <span data-astro-cid-mw7aashj>安裝與環境設定</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch05-first-index" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>5.</span> <span data-astro-cid-mw7aashj>索引你的第一個程式碼庫</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch06-web-ui" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>6.</span> <span data-astro-cid-mw7aashj>Web UI 視覺化探索</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="3" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 3：核心架構原理</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="3" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch07-indexing-pipeline" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>7.</span> <span data-astro-cid-mw7aashj>索引管線：從 Tree-sitter AST 到知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch08-ladybugdb-search" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>8.</span> <span data-astro-cid-mw7aashj>LadybugDB 與混合搜尋（BM25 + Semantic + RRF）</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch09-clustering-processes" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>9.</span> <span data-astro-cid-mw7aashj>Leiden 社群偵測與執行流程追蹤</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="4" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 4：MCP 整合與 Agent 實戰</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="4" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch10-mcp-setup" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>10.</span> <span data-astro-cid-mw7aashj>MCP 整合：連接 Claude Code 與各大編輯器</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch11-mcp-tools" class="active" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>11.</span> <span data-astro-cid-mw7aashj>16 個 MCP 工具詳解</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch12-skills-hooks" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>12.</span> <span data-astro-cid-mw7aashj>Agent Skills 與 Hooks 自動化工作流</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch13-real-world" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>13.</span> <span data-astro-cid-mw7aashj>實戰場景：PR Review、Bug 定位、安全重構</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="5" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 5：進階應用與生態</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="5" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch14-multi-repo-docker" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>14.</span> <span data-astro-cid-mw7aashj>多倉庫架構與 Docker 部署</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch15-cypher-wiki" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>15.</span> <span data-astro-cid-mw7aashj>Cypher 圖查詢與 Wiki 自動生成</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch16-tool-comparison" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>16.</span> <span data-astro-cid-mw7aashj>競品橫向比較與工具選型</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="6" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 6：附錄</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="6" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/about" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>17.</span> <span data-astro-cid-mw7aashj>關於作者</span>  </a> </li> </ul> </div> </nav> <div id="ov" data-astro-cid-mw7aashj></div> <main data-astro-cid-mw7aashj> <div class="cb" data-astro-cid-mw7aashj>  <span class="clabel">第 11 章 · Part 4：MCP 整合與 Agent 實戰</span> <h1>16 個 MCP 工具詳解</h1> <p class="cdesc">impact、context、query、detect_changes、rename、cypher——每個工具一次講透</p> <h2>工具總覽</h2> <p>GitNexus 透過 MCP（Model Context Protocol）暴露 16 個工具。分為兩類：</p> <table> <thead> <tr> <th>類型</th> <th>數量</th> <th>用途</th> </tr> </thead> <tbody> <tr> <td><strong>Per-repo 工具</strong></td> <td>11 個</td> <td>針對單一 repo 的查詢、分析、搜尋</td> </tr> <tr> <td><strong>Multi-repo 群組工具</strong></td> <td>5 個</td> <td>跨多個 repo / 微服務的契約提取與比對</td> </tr> </tbody> </table> <h2>Per-repo 核心工具</h2> <h3>impact — 爆炸半徑分析</h3> <p>GitNexus 最核心的工具。在修改任何函式、類別或模組前，先用 <code>impact</code> 確認影響範圍：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>impact 工具：爆炸半徑分析</span> <button class="cb-copy" data-code="# impact 工具：爆炸半徑（Blast Radius）分析
+# 修改某個符號前，先看影響範圍
+
+用法（在 Claude Code 中對話觸發）：
+  &quot;use gitnexus impact to analyze validatePayment&quot;
+  &quot;如果修改 UserService.login，會影響哪些程式碼？&quot;
+
+返回結果格式：
+  d=1（WILL BREAK）  ← 直接呼叫方，必須同步更新
+    - checkout.ts:89    processCheckout()
+    - auth.ts:142       authenticateUser()
+
+  d=2（LIKELY AFFECTED）  ← 間接依賴，建議測試
+    - payment.ts:203    handlePayment()
+    - webhook.ts:67     processWebhook()
+
+  d=3（MAY NEED TESTING）  ← 傳遞鏈路，核心路徑測試
+    - metrics.ts:45     trackConversion()
+
+Confidence: 0.87 (high)" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># impact 工具：爆炸半徑（Blast Radius）分析</span></span>
+<span class="line"><span># 修改某個符號前，先看影響範圍</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>用法（在 Claude Code 中對話觸發）：</span></span>
+<span class="line"><span>  "use gitnexus impact to analyze validatePayment"</span></span>
+<span class="line"><span>  "如果修改 UserService.login，會影響哪些程式碼？"</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>返回結果格式：</span></span>
+<span class="line"><span>  d=1（WILL BREAK）  ← 直接呼叫方，必須同步更新</span></span>
+<span class="line"><span>    - checkout.ts:89    processCheckout()</span></span>
+<span class="line"><span>    - auth.ts:142       authenticateUser()</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  d=2（LIKELY AFFECTED）  ← 間接依賴，建議測試</span></span>
+<span class="line"><span>    - payment.ts:203    handlePayment()</span></span>
+<span class="line"><span>    - webhook.ts:67     processWebhook()</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  d=3（MAY NEED TESTING）  ← 傳遞鏈路，核心路徑測試</span></span>
+<span class="line"><span>    - metrics.ts:45     trackConversion()</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Confidence: 0.87 (high)</span></span></code></pre> </div> </div>  <script type="module">document.querySelectorAll(".cb-copy").forEach(e=>{e.addEventListener("click",()=>{const t=e.dataset.code;t&&navigator.clipboard.writeText(t).then(()=>{e.textContent="已複製!",e.classList.add("copied"),setTimeout(()=>{e.textContent="複製",e.classList.remove("copied")},2e3)})})});</script> <p><code>impact</code> 返回三層影響：</p> <ul> <li><strong>d=1（WILL BREAK）</strong>：直接呼叫方，修改後必須同步更新，否則一定壞</li> <li><strong>d=2（LIKELY AFFECTED）</strong>：間接依賴，建議回歸測試</li> <li><strong>d=3（MAY NEED TESTING）</strong>：傳遞鏈路，核心路徑上建議測試</li> </ul> <p>每個 <code>impact</code> 結果附帶 Confidence 置信度評分（0-1），反映圖譜在這個節點的完整性。</p> <h3>context — 符號 360 度視角</h3> <p>取得某個符號的完整上下游關係——誰呼叫它、它呼叫誰、它屬於哪些執行流程：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>context 工具：符號完整上下文</span> <button class="cb-copy" data-code="# context 工具：符號 360 度視角
+# 一次拿到某個符號的所有上下游關係
+
+用法：
+  &quot;use gitnexus context on validatePayment&quot;
+  &quot;给我看 UserAuthService 的所有調用關係&quot;
+
+返回：
+  Symbol: validatePayment (function)
+  File: src/payments/validator.ts:42
+  Cluster: payments
+
+  Callers (5):          ← 誰呼叫了我
+    checkout.ts:89        processCheckout
+    subscription.ts:34    renewSubscription
+    ...
+
+  Callees (3):          ← 我呼叫了誰
+    formatCurrency (utils/format.ts:12)
+    fetchExchangeRate (api/rates.ts:78)
+    ...
+
+  Processes (2):        ← 我屬於哪些執行流程
+    checkoutFlow (入口: api/checkout → 47 步驟)
+    subscriptionRenewal (入口: cron/renewal → 23 步驟)" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># context 工具：符號 360 度視角</span></span>
+<span class="line"><span># 一次拿到某個符號的所有上下游關係</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>用法：</span></span>
+<span class="line"><span>  "use gitnexus context on validatePayment"</span></span>
+<span class="line"><span>  "给我看 UserAuthService 的所有調用關係"</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>返回：</span></span>
+<span class="line"><span>  Symbol: validatePayment (function)</span></span>
+<span class="line"><span>  File: src/payments/validator.ts:42</span></span>
+<span class="line"><span>  Cluster: payments</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  Callers (5):          ← 誰呼叫了我</span></span>
+<span class="line"><span>    checkout.ts:89        processCheckout</span></span>
+<span class="line"><span>    subscription.ts:34    renewSubscription</span></span>
+<span class="line"><span>    ...</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  Callees (3):          ← 我呼叫了誰</span></span>
+<span class="line"><span>    formatCurrency (utils/format.ts:12)</span></span>
+<span class="line"><span>    fetchExchangeRate (api/rates.ts:78)</span></span>
+<span class="line"><span>    ...</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  Processes (2):        ← 我屬於哪些執行流程</span></span>
+<span class="line"><span>    checkoutFlow (入口: api/checkout → 47 步驟)</span></span>
+<span class="line"><span>    subscriptionRenewal (入口: cron/renewal → 23 步驟)</span></span></code></pre> </div> </div>   <p><code>context</code> 最適合用在「我需要理解這個函式在整個系統中的角色」這類問題，或者在接手陌生模組時快速定向。</p> <h3>query — 混合搜尋</h3> <p>用自然語言搜尋 codebase，結合 BM25 關鍵字匹配和語義向量搜尋，RRF 融合排名：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>query 工具：混合搜尋</span> <button class="cb-copy" data-code="# query 工具：混合搜尋（BM25 + 語義向量 + RRF）
+# 支援自然語言語義搜尋（需要 --embeddings）
+
+用法：
+  &quot;use gitnexus query to find authentication logic&quot;
+  &quot;搜尋處理支付失敗的程式碼&quot;
+  &quot;find rate limiting middleware&quot;
+
+返回：排序後的相關符號清單
+  1. validateToken (auth/jwt.ts:23) — score: 0.92
+     呼叫方: 12個  呼叫: 3個  Cluster: auth
+
+  2. AuthMiddleware (middleware/auth.ts:8) — score: 0.87
+     呼叫方: 8個  呼叫: 5個  Cluster: auth
+  ...
+
+# BM25（關鍵字）+ 語義向量（HuggingFace transformers.js）
+# RRF（Reciprocal Rank Fusion）融合排名" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># query 工具：混合搜尋（BM25 + 語義向量 + RRF）</span></span>
+<span class="line"><span># 支援自然語言語義搜尋（需要 --embeddings）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>用法：</span></span>
+<span class="line"><span>  "use gitnexus query to find authentication logic"</span></span>
+<span class="line"><span>  "搜尋處理支付失敗的程式碼"</span></span>
+<span class="line"><span>  "find rate limiting middleware"</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>返回：排序後的相關符號清單</span></span>
+<span class="line"><span>  1. validateToken (auth/jwt.ts:23) — score: 0.92</span></span>
+<span class="line"><span>     呼叫方: 12個  呼叫: 3個  Cluster: auth</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  2. AuthMiddleware (middleware/auth.ts:8) — score: 0.87</span></span>
+<span class="line"><span>     呼叫方: 8個  呼叫: 5個  Cluster: auth</span></span>
+<span class="line"><span>  ...</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># BM25（關鍵字）+ 語義向量（HuggingFace transformers.js）</span></span>
+<span class="line"><span># RRF（Reciprocal Rank Fusion）融合排名</span></span></code></pre> </div> </div>   <div class="call tip"> <span class="ci">💡</span> <div> <strong>query 對比 grep 的優勢</strong> <p>傳統 grep 只能搜尋字串，用「handle user authentication」搜不到叫 <code>validateJWT</code> 或 <code>checkCredentials</code> 的函式。<code>query</code> 的語義向量理解意思，把「authentication」和「validateToken」、「AuthMiddleware」連結起來——這就是語義搜尋。</p> </div> </div> <h3>detect_changes — Git Diff 影響映射</h3> <p>在 commit 前用 <code>detect_changes</code> 確認這次修改的實際影響——不只是「改了哪些行」，而是「影響了哪些執行流程」：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>detect_changes 工具：變更影響分析</span> <button class="cb-copy" data-code="# detect_changes 工具：Git diff 影響映射
+# 把「改了哪幾行」轉換成「影響哪些執行流程」
+
+用法：
+  &quot;use gitnexus detect_changes&quot;
+  &quot;分析這次 commit 的實際影響&quot;
+  （在 commit 前執行最有用）
+
+工作原理：
+  1. 讀取 git diff（當前 uncommitted changes 或指定 commit）
+  2. 找到被修改行對應的符號
+  3. 映射到包含這些符號的執行流程（Processes）
+  4. 返回受影響的流程清單及風險評估
+
+返回示例：
+  Changed: validator.ts:42-67 (validatePayment)
+
+  Affected Processes:
+    ⚠️  checkoutFlow     (HIGH risk — 核心支付路徑)
+    ⚡  subscriptionFlow (MEDIUM risk)
+    ✓   testPayment      (LOW risk — 僅測試路徑)" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># detect_changes 工具：Git diff 影響映射</span></span>
+<span class="line"><span># 把「改了哪幾行」轉換成「影響哪些執行流程」</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>用法：</span></span>
+<span class="line"><span>  "use gitnexus detect_changes"</span></span>
+<span class="line"><span>  "分析這次 commit 的實際影響"</span></span>
+<span class="line"><span>  （在 commit 前執行最有用）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>工作原理：</span></span>
+<span class="line"><span>  1. 讀取 git diff（當前 uncommitted changes 或指定 commit）</span></span>
+<span class="line"><span>  2. 找到被修改行對應的符號</span></span>
+<span class="line"><span>  3. 映射到包含這些符號的執行流程（Processes）</span></span>
+<span class="line"><span>  4. 返回受影響的流程清單及風險評估</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>返回示例：</span></span>
+<span class="line"><span>  Changed: validator.ts:42-67 (validatePayment)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  Affected Processes:</span></span>
+<span class="line"><span>    ⚠️  checkoutFlow     (HIGH risk — 核心支付路徑)</span></span>
+<span class="line"><span>    ⚡  subscriptionFlow (MEDIUM risk)</span></span>
+<span class="line"><span>    ✓   testPayment      (LOW risk — 僅測試路徑)</span></span></code></pre> </div> </div>   <p>這個工具特別適合搭配 Claude Code 的 PostToolUse Hook：在 <code>git commit</code> 後自動觸發，確認索引是否過期，並提示 Claude 分析本次提交的影響範圍。</p> <h3>rename — 安全跨檔案重命名</h3> <p>重構時需要重命名符號，<code>rename</code> 用圖搜尋 + 文字搜尋雙重保險找出所有引用位置：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>rename 工具：安全跨檔案重命名</span> <button class="cb-copy" data-code="# rename 工具：安全跨檔案重命名
+# 返回所有需要同步更新的位置
+
+用法：
+  &quot;use gitnexus rename to find all references to validatePayment&quot;
+  &quot;找出所有 UserService 的引用位置，我要重命名&quot;
+
+工作原理（雙重保險）：
+  1. 圖搜尋：從 LadybugDB 的邊關係找到所有 references
+  2. 文字搜尋：全文搜尋所有字串出現位置
+  最終取聯集，確保不遺漏
+
+返回：
+  References to validatePayment (23 locations):
+    src/checkout.ts:89
+    src/payments/processor.ts:34
+    tests/payment.test.ts:12
+    docs/api.md:45        ← 連文件裡的引用也找到
+    ...
+
+注意：rename 工具只「返回位置清單」，實際重命名操作
+由 Claude Code 的 Edit 工具執行——職責分離。" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># rename 工具：安全跨檔案重命名</span></span>
+<span class="line"><span># 返回所有需要同步更新的位置</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>用法：</span></span>
+<span class="line"><span>  "use gitnexus rename to find all references to validatePayment"</span></span>
+<span class="line"><span>  "找出所有 UserService 的引用位置，我要重命名"</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>工作原理（雙重保險）：</span></span>
+<span class="line"><span>  1. 圖搜尋：從 LadybugDB 的邊關係找到所有 references</span></span>
+<span class="line"><span>  2. 文字搜尋：全文搜尋所有字串出現位置</span></span>
+<span class="line"><span>  最終取聯集，確保不遺漏</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>返回：</span></span>
+<span class="line"><span>  References to validatePayment (23 locations):</span></span>
+<span class="line"><span>    src/checkout.ts:89</span></span>
+<span class="line"><span>    src/payments/processor.ts:34</span></span>
+<span class="line"><span>    tests/payment.test.ts:12</span></span>
+<span class="line"><span>    docs/api.md:45        ← 連文件裡的引用也找到</span></span>
+<span class="line"><span>    ...</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>注意：rename 工具只「返回位置清單」，實際重命名操作</span></span>
+<span class="line"><span>由 Claude Code 的 Edit 工具執行——職責分離。</span></span></code></pre> </div> </div>   <h3>cypher — 原始圖查詢</h3> <p>進階用戶可以直接執行 Cypher 查詢，探索 LadybugDB 中的完整圖結構：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>cypher 工具：原始 Cypher 圖查詢</span> <button class="cb-copy" data-code="# cypher 工具：原始 Cypher 圖查詢
+# 直接查 LadybugDB，給進階用戶
+
+用法示例（Cypher 查詢語法）：
+  # 找所有沒有被任何地方呼叫的函式（孤立函式）
+  MATCH (n:Symbol {type: 'function'})
+  WHERE NOT (()-[:CALLS]->(n))
+  RETURN n.name, n.file
+
+  # 找兩個符號之間的最短路徑
+  MATCH path = shortestPath(
+    (a:Symbol {name: 'checkout'})-[:CALLS*]-(b:Symbol {name: 'sendEmail'})
+  )
+  RETURN path
+
+  # 找循環依賴
+  MATCH (a:Symbol)-[:IMPORTS]->(b:Symbol)-[:IMPORTS]->(a)
+  RETURN a.name, b.name" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="text"><code><span class="line"><span># cypher 工具：原始 Cypher 圖查詢</span></span>
+<span class="line"><span># 直接查 LadybugDB，給進階用戶</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>用法示例（Cypher 查詢語法）：</span></span>
+<span class="line"><span>  # 找所有沒有被任何地方呼叫的函式（孤立函式）</span></span>
+<span class="line"><span>  MATCH (n:Symbol {type: 'function'})</span></span>
+<span class="line"><span>  WHERE NOT (()-[:CALLS]->(n))</span></span>
+<span class="line"><span>  RETURN n.name, n.file</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  # 找兩個符號之間的最短路徑</span></span>
+<span class="line"><span>  MATCH path = shortestPath(</span></span>
+<span class="line"><span>    (a:Symbol {name: 'checkout'})-[:CALLS*]-(b:Symbol {name: 'sendEmail'})</span></span>
+<span class="line"><span>  )</span></span>
+<span class="line"><span>  RETURN path</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  # 找循環依賴</span></span>
+<span class="line"><span>  MATCH (a:Symbol)-[:IMPORTS]->(b:Symbol)-[:IMPORTS]->(a)</span></span>
+<span class="line"><span>  RETURN a.name, b.name</span></span></code></pre> </div> </div>   <div class="call info"> <span class="ci">ℹ️</span> <div> <strong>Cypher 查詢語言</strong> <p>Cypher 是 Neo4j 開創的圖查詢語言，現已成為 openCypher 開放標準。LadybugDB 支援 Cypher 查詢，語法與 Neo4j 相同。常用的模式匹配：<code>MATCH (n)-[:CALLS]->(m)</code>（n 呼叫 m）、<code>shortestPath()</code>（最短路徑）、<code>MATCH path = (n)-[*1..5]->(m)</code>（最多 5 跳的路徑）。</p> </div> </div> <h3>list_repos — 倉庫清單</h3> <p>列出全局 registry 中所有已索引的 repo，包括索引時間、符號數量、狀態：</p> <pre><code>用法："use gitnexus list_repos"
+返回：
+  ● my-app (/Users/porter/projects/my-app)
+    Symbols: 81,400  Relations: 191,438  Last indexed: 2h ago  Status: current
+  ● api-service (/Users/porter/projects/api-service)
+    Symbols: 23,100  Status: stale (8 files changed since last index)</code></pre> <h2>Per-repo 其他工具</h2> <table> <thead> <tr> <th>工具</th> <th>功能</th> <th>典型使用時機</th> </tr> </thead> <tbody> <tr> <td><code>list_clusters</code></td> <td>列出 Leiden 偵測的所有功能集群及成員</td> <td>理解專案整體模組劃分</td> </tr> <tr> <td><code>list_processes</code></td> <td>列出所有追蹤到的執行流程（從入口到終點）</td> <td>找到某個業務功能對應的程式碼路徑</td> </tr> <tr> <td><code>status</code></td> <td>查看當前 repo 的索引狀態（是否 stale）</td> <td>確認索引是否需要更新</td> </tr> <tr> <td><code>wiki</code></td> <td>基於知識圖譜生成專案 Wiki（會呼叫 LLM API）</td> <td>自動維護程式碼文件</td> </tr> </tbody> </table> <h2>Multi-repo 群組工具（5 個）</h2> <p>群組工具適合微服務架構或 monorepo — 把多個互相依賴的 repo 組成群組，分析跨服務的契約與依賴：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>多倉庫群組工具</span> <button class="cb-copy" data-code="# 多倉庫群組工具（5 個）— 跨服務追蹤
+
+# 1. group_list — 列出所有群組
+gitnexus group list
+
+# 2. group_create + group_add — 建立群組並加入 repo
+gitnexus group create my-services
+gitnexus group add my-services backend/api api-service
+gitnexus group add my-services backend/worker worker-service
+
+# 3. group_sync — 提取契約並做跨 repo 比對
+# MCP 工具呼叫：&quot;use gitnexus group_sync on my-services&quot;
+# 提取各 repo 的 API 契約（HTTP routes、函式介面）
+# 跨 repo 比對：找到 caller 在 service-A 呼叫
+# 而 callee 定義在 service-B 的跨服務呼叫鏈
+
+# 4. group_contracts — 查看契約清單
+# 5. group_query — 在群組內跨 repo 搜尋執行流程
+# 6. group_status — 檢查群組內所有 repo 的索引是否過期" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 多倉庫群組工具（5 個）— 跨服務追蹤</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 1. group_list — 列出所有群組</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> list</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 2. group_create + group_add — 建立群組並加入 repo</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> create</span><span style="color:#98C379"> my-services</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> add</span><span style="color:#98C379"> my-services</span><span style="color:#98C379"> backend/api</span><span style="color:#98C379"> api-service</span></span>
+<span class="line"><span style="color:#61AFEF">gitnexus</span><span style="color:#98C379"> group</span><span style="color:#98C379"> add</span><span style="color:#98C379"> my-services</span><span style="color:#98C379"> backend/worker</span><span style="color:#98C379"> worker-service</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 3. group_sync — 提取契約並做跨 repo 比對</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># MCP 工具呼叫："use gitnexus group_sync on my-services"</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 提取各 repo 的 API 契約（HTTP routes、函式介面）</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 跨 repo 比對：找到 caller 在 service-A 呼叫</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 而 callee 定義在 service-B 的跨服務呼叫鏈</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 4. group_contracts — 查看契約清單</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 5. group_query — 在群組內跨 repo 搜尋執行流程</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 6. group_status — 檢查群組內所有 repo 的索引是否過期</span></span></code></pre> </div> </div>   <table> <thead> <tr> <th>工具</th> <th>功能</th> </tr> </thead> <tbody> <tr> <td><code>group_list</code></td> <td>列出已配置的所有倉庫群組</td> </tr> <tr> <td><code>group_sync</code></td> <td>提取各 repo 的 API 契約（HTTP routes、函式介面），跨 repo 比對呼叫方與被呼叫方</td> </tr> <tr> <td><code>group_contracts</code></td> <td>查看 group_sync 提取出的完整契約清單與跨連結</td> </tr> <tr> <td><code>group_query</code></td> <td>在群組內跨 repo 搜尋執行流程</td> </tr> <tr> <td><code>group_status</code></td> <td>檢查群組內所有 repo 的索引是否過期（stale 偵測）</td> </tr> </tbody> </table> <div class="call info"> <span class="ci">ℹ️</span> <div> <strong>群組工具的使用前提</strong> <p>群組工具需要每個 repo 分別完成 <code>gitnexus analyze</code>，並用 <code>gitnexus group add</code> 加入群組。<code>group_sync</code> 才能在本地的多個索引間做跨 repo 契約比對，整個過程仍然是零伺服器、本地執行。Enterprise 版本的多 repo 功能提供統一的跨倉庫圖譜（而不是多個獨立索引的拼接）。</p> </div> </div> <h2>工具使用時機速查</h2> <table> <thead> <tr> <th>場景</th> <th>使用工具</th> <th>問法</th> </tr> </thead> <tbody> <tr> <td>修改函式前確認影響</td> <td><code>impact</code></td> <td>「修改 X 前先用 gitnexus impact 分析」</td> </tr> <tr> <td>接手陌生模組，理解關係</td> <td><code>context</code></td> <td>「用 gitnexus context 分析 AuthService」</td> </tr> <tr> <td>找處理某功能的程式碼</td> <td><code>query</code></td> <td>「用 gitnexus query 找處理 X 的程式碼」</td> </tr> <tr> <td>commit 前確認改動影響</td> <td><code>detect_changes</code></td> <td>「用 gitnexus detect_changes 確認影響」</td> </tr> <tr> <td>重構重命名符號</td> <td><code>rename</code></td> <td>「用 gitnexus rename 找所有 X 引用」</td> </tr> <tr> <td>進階圖探索</td> <td><code>cypher</code></td> <td>「用 gitnexus cypher 查詢...」</td> </tr> <tr> <td>理解整體架構分區</td> <td><code>list_clusters</code></td> <td>「列出所有功能集群」</td> </tr> <tr> <td>找某業務流程的程式碼路徑</td> <td><code>list_processes</code></td> <td>「列出所有執行流程」</td> </tr> </tbody> </table>  </div> <nav class="cnav" data-astro-cid-mw7aashj> <a href="/gitnexus/ch10-mcp-setup" class="prev" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>← 上一章</span> <span class="nt" data-astro-cid-mw7aashj>MCP 整合：連接 Claude Code 與各大編輯器</span> </a> <a href="/gitnexus/ch12-skills-hooks" class="next" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>下一章 →</span> <span class="nt" data-astro-cid-mw7aashj>Agent Skills 與 Hooks 自動化工作流</span> </a> </nav> </main> </div> <script>
+    // Theme
+    const html = document.documentElement;
+    const tt = document.getElementById('tt');
+    const isun = document.getElementById('isun');
+    const imoon = document.getElementById('imoon');
+    function syncIcons() {
+      const dk = html.classList.contains('dark');
+      isun.style.display = dk ? 'block' : 'none';
+      imoon.style.display = dk ? 'none' : 'block';
+    }
+    syncIcons();
+    tt?.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('cc-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      syncIcons();
+    });
+
+    // Progress
+    const pb = document.getElementById('pb');
+    window.addEventListener('scroll', () => {
+      const t = document.documentElement.scrollHeight - window.innerHeight;
+      pb.style.width = t > 0 ? `${(window.scrollY / t) * 100}%` : '0%';
+    }, { passive: true });
+
+    // Sidebar part toggles
+    document.querySelectorAll('.pt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.pid;
+        const list = document.querySelector(`[data-pl="${id}"]`);
+        btn.classList.toggle('open');
+        list?.classList.toggle('closed');
+      });
+    });
+
+    // Mobile menu
+    const sb = document.getElementById('sb');
+    const ov = document.getElementById('ov');
+    const mb = document.getElementById('mbtn');
+    const open = () => { sb.classList.add('open'); ov.classList.add('open'); document.body.style.overflow='hidden'; };
+    const close = () => { sb.classList.remove('open'); ov.classList.remove('open'); document.body.style.overflow=''; };
+    mb?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+  </script> </body> 

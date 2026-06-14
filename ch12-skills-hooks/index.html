@@ -1,0 +1,148 @@
+<!DOCTYPE html><html lang="zh-TW" data-astro-cid-mw7aashj> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Agent Skills 與 Hooks 自動化工作流 | </title><link rel="stylesheet" href="/gitnexus/_astro/DocsLayout.BldRaKia.css">
+<style>.cb-wrap[data-astro-cid-jgrc2lfe]{margin-bottom:1.25rem}.cb-bar[data-astro-cid-jgrc2lfe]{display:flex;align-items:center;justify-content:space-between;background:#1a1a2e;border-radius:6px 6px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.05);padding:.18rem .5rem .18rem .75rem;min-height:1.8rem}.cb-label[data-astro-cid-jgrc2lfe]{color:#a6adc8;font-family:Fira Code,Cascadia Code,Consolas,monospace;font-size:.73rem;letter-spacing:.04em}.cb-inner[data-astro-cid-jgrc2lfe] pre{border-radius:0 0 8px 8px!important;margin-bottom:0!important}.cb-copy[data-astro-cid-jgrc2lfe]{background:#ffffff14;color:#888;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:.15rem .55rem;font-size:.7rem;cursor:pointer;transition:all .15s;flex-shrink:0}.cb-copy[data-astro-cid-jgrc2lfe]:hover{background:#ffffff2e;color:#fff}.cb-copy[data-astro-cid-jgrc2lfe].copied{color:#4ec9b0;border-color:#4ec9b0}
+</style></head>GitNexus 完整指南 <meta name="description" content="認識 GitNexus 預裝的 4 個 Agent Skills（Exploring、Debugging、Impact Analysis、Refactoring）與 --skills 參數產生的專案專屬技能。學習用 PreToolUse 與 PostToolUse Hooks 在 AI 修改程式碼後自動重新索引，打造全自動工作流。"> <link rel="icon" href="/gitnexus/favicon.svg" type="image/svg+xml"> <script>
+    (function () {
+      const s = localStorage.getItem('cc-theme');
+      const d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+    })();
+  </script>  </html> <body data-astro-cid-mw7aashj> <div id="pb" data-astro-cid-mw7aashj></div> <header data-astro-cid-mw7aashj> <div class="hi" data-astro-cid-mw7aashj> <div class="hl" data-astro-cid-mw7aashj> <button id="mbtn" class="ibtn" aria-label="選單" data-astro-cid-mw7aashj> <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" data-astro-cid-mw7aashj></path> </svg> </button> <a href="/gitnexus/" class="site-name" data-astro-cid-mw7aashj> <span class="logo" data-astro-cid-mw7aashj>GN</span>&nbsp;&nbsp;GitNexus 完整指南
+</a> </div> <div class="hr" data-astro-cid-mw7aashj> <button id="tt" class="ibtn" aria-label="切換主題" data-astro-cid-mw7aashj> <svg id="isun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" data-astro-cid-mw7aashj></path> </svg> <svg id="imoon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646z" data-astro-cid-mw7aashj></path> </svg> </button> </div> </div> </header> <div id="layout" data-astro-cid-mw7aashj> <nav id="sb" data-astro-cid-mw7aashj> <div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="1" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 1：認識 GitNexus</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="1" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch01-what-is-gitnexus" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>1.</span> <span data-astro-cid-mw7aashj>GitNexus 是什麼？零伺服器程式碼智慧引擎</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch02-why-knowledge-graph" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>2.</span> <span data-astro-cid-mw7aashj>AI Coding 的結構盲點：為什麼需要知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch03-graph-vs-rag" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>3.</span> <span data-astro-cid-mw7aashj>知識圖譜 vs Vector RAG vs Graph RAG</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="2" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 2：安裝與快速上手</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="2" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch04-install" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>4.</span> <span data-astro-cid-mw7aashj>安裝與環境設定</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch05-first-index" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>5.</span> <span data-astro-cid-mw7aashj>索引你的第一個程式碼庫</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch06-web-ui" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>6.</span> <span data-astro-cid-mw7aashj>Web UI 視覺化探索</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="3" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 3：核心架構原理</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="3" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch07-indexing-pipeline" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>7.</span> <span data-astro-cid-mw7aashj>索引管線：從 Tree-sitter AST 到知識圖譜</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch08-ladybugdb-search" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>8.</span> <span data-astro-cid-mw7aashj>LadybugDB 與混合搜尋（BM25 + Semantic + RRF）</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch09-clustering-processes" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>9.</span> <span data-astro-cid-mw7aashj>Leiden 社群偵測與執行流程追蹤</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt open" data-pid="4" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 4：MCP 整合與 Agent 實戰</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl" data-pl="4" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch10-mcp-setup" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>10.</span> <span data-astro-cid-mw7aashj>MCP 整合：連接 Claude Code 與各大編輯器</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch11-mcp-tools" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>11.</span> <span data-astro-cid-mw7aashj>16 個 MCP 工具詳解</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch12-skills-hooks" class="active" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>12.</span> <span data-astro-cid-mw7aashj>Agent Skills 與 Hooks 自動化工作流</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch13-real-world" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>13.</span> <span data-astro-cid-mw7aashj>實戰場景：PR Review、Bug 定位、安全重構</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="5" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 5：進階應用與生態</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="5" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/ch14-multi-repo-docker" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>14.</span> <span data-astro-cid-mw7aashj>多倉庫架構與 Docker 部署</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch15-cypher-wiki" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>15.</span> <span data-astro-cid-mw7aashj>Cypher 圖查詢與 Wiki 自動生成</span>  </a> </li><li data-astro-cid-mw7aashj> <a href="/gitnexus/ch16-tool-comparison" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>16.</span> <span data-astro-cid-mw7aashj>競品橫向比較與工具選型</span>  </a> </li> </ul> </div><div class="np" data-astro-cid-mw7aashj> <button class="pt" data-pid="6" data-astro-cid-mw7aashj> <span data-astro-cid-mw7aashj>Part 6：附錄</span> <svg class="arr" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" data-astro-cid-mw7aashj> <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-astro-cid-mw7aashj></path> </svg> </button> <ul class="nl closed" data-pl="6" data-astro-cid-mw7aashj> <li data-astro-cid-mw7aashj> <a href="/gitnexus/about" data-astro-cid-mw7aashj> <span class="cn" data-astro-cid-mw7aashj>17.</span> <span data-astro-cid-mw7aashj>關於作者</span>  </a> </li> </ul> </div> </nav> <div id="ov" data-astro-cid-mw7aashj></div> <main data-astro-cid-mw7aashj> <div class="cb" data-astro-cid-mw7aashj>  <span class="clabel">第 12 章 · Part 4：MCP 整合與 Agent 實戰</span> <h1>Agent Skills 與 Hooks 自動化工作流</h1> <p class="cdesc">讓索引隨程式碼自動更新，Skills 隨專案自動生成</p> <h2>AI 協作的關鍵思維：Skills 是建議書，Hooks 是合約</h2> <p>
+在引導 AI Agent（例如 Claude Code、Cursor 等）與中大型專案進行協作時，如何提供規範與限制是一個關鍵問題。
+    很多人傾向於往 System Prompt 或 `.clauderc` 規則文件裡寫入一長串「請每次都執行 X 命令」或「修改此檔案前必須先做 Y」。
+</p> <p>
+然而，這類文字指引在大上下文場景下會面臨嚴重的<strong>選擇性遗忘</strong>。
+    為了解決這個瓶頸，我們必須區分兩大協作機制：
+</p> <svg viewBox="0 0 800 240" width="100%" height="auto" style="background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin: 1.5rem 0;"> <defs> <marker id="arrow-blue" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"> <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6"></path> </marker> <marker id="arrow-accent" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"> <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"></path> </marker> </defs> <!-- AI Agent --> <rect x="20" y="90" width="120" height="60" rx="8" fill="var(--bg)" stroke="var(--border)" stroke-width="2"></rect> <text x="80" y="120" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="13">AI Coding Agent</text> <text x="80" y="138" text-anchor="middle" fill="var(--muted)" font-size="10">Claude Code</text> <!-- Lines --> <path d="M 140 100 L 250 60" fill="none" stroke="var(--border)" stroke-width="2" marker-end="url(#arrow-blue)"></path> <path d="M 140 140 L 250 180" fill="none" stroke="var(--border)" stroke-width="2" marker-end="url(#arrow-accent)"></path> <!-- ==================== UPPER BRANCH: SKILLS ==================== --> <rect x="260" y="25" width="220" height="70" rx="6" fill="rgba(59,130,246,0.05)" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4 4"></rect> <text x="370" y="47" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="12">Skills (自然語言建議書)</text> <text x="275" y="67" fill="var(--muted)" font-size="10">• 唯讀的 SKILL.md 指引文件</text> <text x="275" y="82" fill="var(--muted)" font-size="10">• LLM 根據注意力決定是否遵守</text> <!-- Skills Result --> <rect x="530" y="42" width="140" height="35" rx="4" fill="var(--bg)" stroke="#e06b4a" stroke-width="1.5"></rect> <text x="600" y="63" text-anchor="middle" fill="#e06b4a" font-size="11" font-weight="bold">⚠️ 偶爾會選擇性忽略</text> <line x1="480" y1="60" x2="520" y2="60" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"></line> <!-- ==================== LOWER BRANCH: HOOKS ==================== --> <rect x="260" y="145" width="220" height="70" rx="6" fill="var(--abg)" stroke="var(--accent)" stroke-width="2"></rect> <text x="370" y="167" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="12">Hooks (程式強制合約)</text> <text x="275" y="187" fill="var(--muted)" font-size="10">• PreToolUse & PostToolUse 腳本</text> <text x="275" y="202" fill="var(--muted)" font-size="10">• 事件觸發，執行時硬性攔截檢查</text> <!-- Hooks Result --> <rect x="530" y="162" width="140" height="35" rx="4" fill="var(--bg)" stroke="#10b981" stroke-width="2"></rect> <text x="600" y="183" text-anchor="middle" fill="#10b981" font-size="11" font-weight="bold">✓ 100% 強制執行</text> <line x1="480" y1="180" x2="520" y2="180" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-accent)"></line> <!-- Summary Box on the right --> <rect x="690" y="60" width="95" height="120" rx="6" fill="var(--bg3)"></rect> <text x="737" y="95" text-anchor="middle" font-weight="bold" fill="var(--text)" font-size="11">設計原則</text> <text x="737" y="120" text-anchor="middle" fill="var(--accent)" font-size="10" font-weight="bold">用 Skills</text> <text x="737" y="135" text-anchor="middle" fill="var(--accent)" font-size="10" font-weight="bold">給方向</text> <text x="737" y="155" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="bold">用 Hooks</text> <text x="737" y="170" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="bold">定底線</text> </svg> <ul> <li><strong>Skills（技能/建議）</strong>：使用 Markdown 文件撰寫，提供 AI 在特定主題（如代碼探索、重構）時的引導。它像是一本「操作建議書」，適合用於給予大方向和邏輯框架。</li> <li><strong>Hooks（鉤子/強制）</strong>：使用實體程式碼腳本撰寫（如 JS 腳本），直接攔截 AI Agent 的工具調用事件。它是「硬性合約」，一旦觸發事件（例如寫檔或 commit），100% 強制執行，繞過 LLM 的主觀判定。</li> </ul> <p>這帶來了黃金協作原則：<strong>用 Skills 給方向，用 Hooks 定底線。</strong></p> <h2>Agent Skills 的運作機制</h2> <p>
+當執行 <code>gitnexus analyze --skills</code> 時，GitNexus 會讀取第 9 章提到的 Leiden 社群偵測結果，為各個緊密的功能模組生成對應的 <code>SKILL.md</code>，
+    寫入到本地 <code>.claude/skills/generated/</code> 下。
+</p> <p>一個生成後的 SKILL 結構如下：</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>.claude/skills/generated/auth-skill.md</span> <button class="cb-copy" data-code="# SKILL.md (由 gitnexus analyze --skills 自動生成)
+# 模組: Authentication &amp; Session Management
+
+## 關鍵檔案 (Files)
+- src/auth/login.ts   - 登入邏輯與密碼驗證
+- src/auth/session.ts - 階段管理與驗證過期
+- src/auth/jwt.ts     - JWT Token 簽署與校驗
+
+## 核心入口點 (Entrypoints)
+- loginHandler (src/auth/login.ts:L45)
+- verifySessionMiddleware (src/auth/session.ts:L12)
+
+## 執行流程 (Processes)
+- process_login: loginHandler -> validatePassword -> signToken -> createSession
+- process_verify: verifySessionMiddleware -> checkExpiration -> refreshSession" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="markdown"><code><span class="line"><span style="color:#E06C75"># SKILL.md (由 gitnexus analyze --skills 自動生成)</span></span>
+<span class="line"><span style="color:#E06C75"># 模組: Authentication &#x26; Session Management</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E06C75">## 關鍵檔案 (Files)</span></span>
+<span class="line"><span style="color:#E5C07B">-</span><span style="color:#ABB2BF"> src/auth/login.ts   - 登入邏輯與密碼驗證</span></span>
+<span class="line"><span style="color:#E5C07B">-</span><span style="color:#ABB2BF"> src/auth/session.ts - 階段管理與驗證過期</span></span>
+<span class="line"><span style="color:#E5C07B">-</span><span style="color:#ABB2BF"> src/auth/jwt.ts     - JWT Token 簽署與校驗</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E06C75">## 核心入口點 (Entrypoints)</span></span>
+<span class="line"><span style="color:#E5C07B">-</span><span style="color:#ABB2BF"> loginHandler (src/auth/login.ts:L45)</span></span>
+<span class="line"><span style="color:#E5C07B">-</span><span style="color:#ABB2BF"> verifySessionMiddleware (src/auth/session.ts:L12)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E06C75">## 執行流程 (Processes)</span></span>
+<span class="line"><span style="color:#E5C07B">-</span><span style="color:#ABB2BF"> process_login: loginHandler -> validatePassword -> signToken -> createSession</span></span>
+<span class="line"><span style="color:#E5C07B">-</span><span style="color:#ABB2BF"> process_verify: verifySessionMiddleware -> checkExpiration -> refreshSession</span></span></code></pre> </div> </div>  <script type="module">document.querySelectorAll(".cb-copy").forEach(e=>{e.addEventListener("click",()=>{const t=e.dataset.code;t&&navigator.clipboard.writeText(t).then(()=>{e.textContent="已複製!",e.classList.add("copied"),setTimeout(()=>{e.textContent="複製",e.classList.remove("copied")},2e3)})})});</script> <p>
+每當 AI Agent 開始操作 `src/auth` 目錄時，Astro/Claude 會自動載入這份指引，讓 AI 立刻對此模組的核心檔案、入口、甚至是預先算好的 Processes（執行流程）瞭如指掌，
+    不需要反覆 grep，省下近 95% 的探索用 Token。
+</p> <h2>內建 4 大核心 Skills</h2> <p>GitNexus 預載了 4 大主題 Skill 包，協助 AI 在專案中扮演不同角色：</p> <table> <thead> <tr> <th>Skill</th> <th>作用描述</th> <th>AI Agent 執行效果</th> </tr> </thead> <tbody> <tr> <td><strong>Exploring</strong></td> <td>引導 AI 理解代碼結構、模組關係與資料流向</td> <td>AI 不會再盲目 grep，而是先用 context/query 工具拉取結構圖。</td> </tr> <tr> <td><strong>Debugging</strong></td> <td>針對報錯、日誌或 CI 失敗，從入口點開始向下追溯呼叫鏈</td> <td>AI 能以 runtime process 為線索，快速定位故障源頭的函數。</td> </tr> <tr> <td><strong>Impact Analysis</strong></td> <td>在修改任何關鍵型別或底層函式前，先做爆炸半徑分析</td> <td>強制 AI 先呼叫 `gitnexus_impact`，評估改動風險等級，防範改 A 掛 B。</td> </tr> <tr> <td><strong>Refactoring</strong></td> <td>執行安全重命名、重複代碼提取與模組解耦</td> <td>AI 會先用 `gitnexus_rename` 工具掃描所有影響點，再一次性安全重構。</td> </tr> </tbody> </table> <h2>Hooks：保持地圖最新（Stale Index 防禦）</h2> <p>
+使用圖譜最致命的陷阱是：<strong>地圖一旦過期，就會開始誤導</strong>。
+    如果開發者修改了代碼，而沒有及時重新索引，AI Agent 拿到的就是舊的呼叫圖，此時進行爆炸半徑分析反而容易漏掉新引入的呼叫。
+</p> <p>
+為了防止這個隱患，GitNexus 配置了 <strong>PostToolUse Hook</strong>。
+    每次當 AI 執行提交代碼（git commit）或者是大幅度修改檔案後，Hook 會自動攔截並觸發重新索引：
+</p> <div class="cb-wrap" data-astro-cid-jgrc2lfe> <div class="cb-bar" data-astro-cid-jgrc2lfe> <span class="cb-label" data-astro-cid-jgrc2lfe>.claude/hooks/postToolUse.js</span> <button class="cb-copy" data-code="// .claude/hooks/postToolUse.js (或者 .clauderc.json 中的 hooks 設定)
+// 每次 git commit 或者是寫檔後，自動觸發檢查
+module.exports = async function postToolUse(event) {
+  const { tool, result } = event;
+  
+  // 偵測是否執行了 git commit 或大量代碼修改
+  if (tool === 'run_command' &amp;&amp; result.command &amp;&amp; result.command.includes('git commit')) {
+    console.log('[GitNexus Hook] 檢測到代碼提交，正在更新知識圖譜索引...');
+    
+    // 執行增量索引更新
+    const { exec } = require('child_process');
+    exec('npx gitnexus analyze', (err, stdout, stderr) => {
+      if (err) {
+        console.error('[GitNexus Hook] 索引更新失敗:', stderr);
+      } else {
+        console.log('[GitNexus Hook] 知識圖譜增量索引更新完成！');
+      }
+    });
+  }
+};" data-astro-cid-jgrc2lfe>複製</button> </div> <div class="cb-inner" data-astro-cid-jgrc2lfe> <pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-astro-cid-jgrc2lfe data-language="javascript"><code><span class="line"><span style="color:#7F848E;font-style:italic">// .claude/hooks/postToolUse.js (或者 .clauderc.json 中的 hooks 設定)</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 每次 git commit 或者是寫檔後，自動觸發檢查</span></span>
+<span class="line"><span style="color:#E5C07B">module</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">exports</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> async</span><span style="color:#C678DD"> function</span><span style="color:#61AFEF"> postToolUse</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75;font-style:italic">event</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#C678DD">  const</span><span style="color:#ABB2BF"> { </span><span style="color:#E5C07B">tool</span><span style="color:#ABB2BF">, </span><span style="color:#E5C07B">result</span><span style="color:#ABB2BF"> } </span><span style="color:#56B6C2">=</span><span style="color:#E06C75"> event</span><span style="color:#ABB2BF">;</span></span>
+<span class="line"><span style="color:#ABB2BF">  </span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">  // 偵測是否執行了 git commit 或大量代碼修改</span></span>
+<span class="line"><span style="color:#C678DD">  if</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">tool</span><span style="color:#56B6C2"> ===</span><span style="color:#98C379"> 'run_command'</span><span style="color:#56B6C2"> &#x26;&#x26;</span><span style="color:#E5C07B"> result</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">command</span><span style="color:#56B6C2"> &#x26;&#x26;</span><span style="color:#E5C07B"> result</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">command</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">includes</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'git commit'</span><span style="color:#ABB2BF">)) {</span></span>
+<span class="line"><span style="color:#E5C07B">    console</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">log</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'[GitNexus Hook] 檢測到代碼提交，正在更新知識圖譜索引...'</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#ABB2BF">    </span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // 執行增量索引更新</span></span>
+<span class="line"><span style="color:#C678DD">    const</span><span style="color:#ABB2BF"> { </span><span style="color:#E5C07B">exec</span><span style="color:#ABB2BF"> } </span><span style="color:#56B6C2">=</span><span style="color:#61AFEF"> require</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'child_process'</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#61AFEF">    exec</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'npx gitnexus analyze'</span><span style="color:#ABB2BF">, (</span><span style="color:#E06C75;font-style:italic">err</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">stdout</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">stderr</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#C678DD">      if</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75">err</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#E5C07B">        console</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">error</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'[GitNexus Hook] 索引更新失敗:'</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">stderr</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#ABB2BF">      } </span><span style="color:#C678DD">else</span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#E5C07B">        console</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">log</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'[GitNexus Hook] 知識圖譜增量索引更新完成！'</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#ABB2BF">      }</span></span>
+<span class="line"><span style="color:#ABB2BF">    });</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">};</span></span></code></pre> </div> </div>   <p>
+透過將「重新索引」的職責寫在 Hook 裡，開發者和 AI Agent 無需手動記錄何時需要 analyze，系統會自行硬性把關，確保地圖永不過期。
+</p> <h2>PreToolUse Hook：圖譜上下文自動注入</h2> <p>
+另一個實用場景是 <strong>PreToolUse Hook</strong>。
+    當 AI 嘗試使用 `view_file` 或 `grep_search` 時，Hook 會在工具執行前自動以被查檔案為 node，呼叫 GitNexus 把該檔案關聯的 360 度結構（Imports、Defines、鄰居節點）以極精簡的 summary 格式塞進對話中。
+    這實現了「無感」的架構感知——AI 在查檔案內容的瞬間，背景已經自動拿到了關係圖譜的上下文。
+</p> <h2>本章小結</h2> <p>
+在 AI Coding 的大航海時代，我們不能僅指望自然語言的 Skills 來規範 AI 行為。
+    GitNexus 透過 Leiden 演算法自動生成專案專屬 Skills 解決「代碼架構理解」問題，提供局部大方向；
+    並透過 Pre/PostToolUse Hooks 建立程式級的攔截，確保圖譜在每次變更後自動完成增量更新。
+    兩者結合，才能在不耗費多餘 Token 的前提下，打造出一套真正穩定、精確、持續保鮮的 AI 自動化工作流。
+</p>  </div> <nav class="cnav" data-astro-cid-mw7aashj> <a href="/gitnexus/ch11-mcp-tools" class="prev" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>← 上一章</span> <span class="nt" data-astro-cid-mw7aashj>16 個 MCP 工具詳解</span> </a> <a href="/gitnexus/ch13-real-world" class="next" data-astro-cid-mw7aashj> <span class="nd" data-astro-cid-mw7aashj>下一章 →</span> <span class="nt" data-astro-cid-mw7aashj>實戰場景：PR Review、Bug 定位、安全重構</span> </a> </nav> </main> </div> <script>
+    // Theme
+    const html = document.documentElement;
+    const tt = document.getElementById('tt');
+    const isun = document.getElementById('isun');
+    const imoon = document.getElementById('imoon');
+    function syncIcons() {
+      const dk = html.classList.contains('dark');
+      isun.style.display = dk ? 'block' : 'none';
+      imoon.style.display = dk ? 'none' : 'block';
+    }
+    syncIcons();
+    tt?.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('cc-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      syncIcons();
+    });
+
+    // Progress
+    const pb = document.getElementById('pb');
+    window.addEventListener('scroll', () => {
+      const t = document.documentElement.scrollHeight - window.innerHeight;
+      pb.style.width = t > 0 ? `${(window.scrollY / t) * 100}%` : '0%';
+    }, { passive: true });
+
+    // Sidebar part toggles
+    document.querySelectorAll('.pt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.pid;
+        const list = document.querySelector(`[data-pl="${id}"]`);
+        btn.classList.toggle('open');
+        list?.classList.toggle('closed');
+      });
+    });
+
+    // Mobile menu
+    const sb = document.getElementById('sb');
+    const ov = document.getElementById('ov');
+    const mb = document.getElementById('mbtn');
+    const open = () => { sb.classList.add('open'); ov.classList.add('open'); document.body.style.overflow='hidden'; };
+    const close = () => { sb.classList.remove('open'); ov.classList.remove('open'); document.body.style.overflow=''; };
+    mb?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+  </script> </body> 
